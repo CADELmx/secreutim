@@ -33,11 +33,6 @@ export default function Index() {
       selectedItem: `act-${record.actividades.length}`
     })
   }
-  useEffect(() => {
-
-  }, [
-
-  ])
   return (
     <div className="flex flex-col items-center justify-center">
       <div className="flex-col object-fill w-2/3 pt-5 mt-5">
