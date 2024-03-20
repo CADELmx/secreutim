@@ -16,11 +16,11 @@ module.exports = {
         background: "hsl(var(--btn-background))",
         btn: {
           background: "hsl(var(--btn-background))",
+          foreground: "hsl(var(--foreground))",
           "background-hover": "hsl(var(--btn-background-hover))",
         },
       },
     },
   },
-  darkMode: 'media',
   plugins: [nextui()],
 }

@@ -30,14 +30,16 @@ export const Activity = ({ act }) => {
     }
     return (
         <div onChange={handleChange} className='flex flex-col gap-2'>
-            <Select label="Distribución de actividades" onChange={handleChange} name="distribucion_actividades" defaultSelectedKeys={[act?.distribucion_actividades]}>
-                {
-                    distribucionActividades.map((a) => {
-                        return <SelectItem key={a} variant="flat">{a}</SelectItem>
-                    })
-                }
-            </Select>
-            <Input label="Nombre de actividades" type="text" name="nombre_actividades" isRequired defaultValue={act.nombre_actividades} />
+            <div className='flex flex-col md:flex-row gap-2'>
+                <Select className='md:w-3/5' label="Distribución de actividades" onChange={handleChange} name="distribucion_actividades" defaultSelectedKeys={[act?.distribucion_actividades]}>
+                    {
+                        distribucionActividades.map((a) => {
+                            return <SelectItem key={a} variant="flat">{a}</SelectItem>
+                        })
+                    }
+                </Select>
+                <Input label="Nombre de actividades" type="text" name="nombre_actividades" isRequired defaultValue={act.nombre_actividades} />
+            </div>
             <div className="flex flex-col md:flex-row gap-2">
                 <Select className="md:w-2/5" label='Programa educativo' name='pe' defaultSelectedKeys={[act.pe?.siglas]} onSelectionChange={(e) => {
                     setStored({

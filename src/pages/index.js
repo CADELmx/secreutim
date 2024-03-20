@@ -2,7 +2,7 @@ import { Activity } from "@/components/Activity";
 import { StoredContext } from "@/context";
 import { defaultActivity, puestos, titulos } from "@/utils";
 import { Accordion, AccordionItem, Badge, BreadcrumbItem, Breadcrumbs, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Select, SelectItem, SelectSection } from "@nextui-org/react";
-import { useEffect } from "react";
+import { useTheme } from "next-themes";
 import toast from "react-hot-toast";
 
 export default function Index() {
@@ -33,9 +33,10 @@ export default function Index() {
       selectedItem: `act-${record.actividades.length}`
     })
   }
+
   return (
     <div className="flex flex-col items-center justify-center">
-      <div className="flex-col object-fill w-2/3 pt-5 mt-5">
+      <div className="flex-col object-fill w-5/6 sm:w-2/3 pt-5 mt-5">
         <form className="flex flex-col gap-2">
           <div className="flex gap-2">
             <Input label="N." type="number" name="no" onChange={handleChange} />
