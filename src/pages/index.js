@@ -1,11 +1,14 @@
 import { Activity } from "@/components/Activity";
 import { StoredContext } from "@/context";
-import { defaultActivity, puestos, titulos } from "@/utils";
+import { defaultActivity, generatePeriods, puestos, titulos } from "@/utils";
 import { Accordion, AccordionItem, Badge, BreadcrumbItem, Breadcrumbs, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Select, SelectItem, SelectSection } from "@nextui-org/react";
-import { useTheme } from "next-themes";
+import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function Index() {
+  const year = new Date().getFullYear()
+  const years = Array.from({ length: 5 }, (_, k) => `${year - k + 1}`)
+  const [selectedYear, setSelectedYear] = useState(year)
   const { memory: { record, selectedItem }, setStored } = StoredContext()
   const handleChange = (e) => {
     setStored({ record: { ...record, [e.target?.name]: e.target?.value } })
@@ -66,6 +69,33 @@ export default function Index() {
           <Input isRequired label="Apellido Paterno" type="text" name="apellido_paterno" onChange={handleChange} />
           <Input isRequired label="Apellido Materno" type="text" name="apellido_materno" onChange={handleChange} />
           <Input isRequired label="Nombres" type="text" name="nombres" onChange={handleChange} />
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Select label='Año' className="md:w-2/5" onChange={(e) => {
+              setSelectedYear(e.target.value)
+            }}>
+              {
+                years.map((year) => {
+                  return <SelectItem key={year} variant="flat">{year}</SelectItem>
+                })
+              }
+            </Select>
+            <Select label='Periodo' autoCapitalize="words">
+              <SelectSection title={'Ordinario'}>
+                {
+                  generatePeriods(selectedYear, true).map(p => {
+                    return <SelectItem key={p} variant="flat">{p}</SelectItem>
+                  })
+                }
+              </SelectSection>
+              <SelectSection title={'Extraordinario'}>
+                {
+                  generatePeriods(selectedYear).map(p => {
+                    return <SelectItem key={p} variant="flat">{p}</SelectItem>
+                  })
+                }
+              </SelectSection>
+            </Select>
+          </div>
           <Accordion showDivider={false} isCompact fullWidth selectionMode="multiple">
             <AccordionItem title='Actividades' startContent={<Badge color="primary" content={record.actividades.length}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">

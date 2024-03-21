@@ -170,18 +170,16 @@ export const defaultValidation = {
 
 export const generatePeriods = (year, ordinario) => {
     const period = 4
-    const periods = []
-    const generateMonthName = (y = year, m) => {
+    const generateMonthName = (m, y = year) => {
         const date = new Date(y, m)
         return date.toLocaleString('es-MX', { month: 'long' })
     }
-    const generateFormat = (month1, month2, y = year, o = ordinario) => {
+    const generateFormat = (month1, month2, o = ordinario, y = year) => {
         return `${month1} - ${month2} ${y}: ${o ? 'Ordinario' : 'Extraordinario'}`
     }
-    for (let i = 0; i < 12; i += period) {
-        const month1 = generateMonthName(i)
-        const month2 = generateMonthName(i + period)
-        periods.push(generateFormat(month1, month2))
-    }
-    return periods
+    return Array.from({ length: 3 }, (_, k) => {
+        const month1 = generateMonthName(k * period)
+        const month2 = generateMonthName(k * period + period - 1)
+        return generateFormat(month1, month2)
+    })
 }
