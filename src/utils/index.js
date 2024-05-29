@@ -1,3 +1,5 @@
+import { createClient } from "@supabase/supabase-js";
+
 export const puestos = [
     'Profesor de Tiempo Completo Titular A',
     'Profesor de Tiempo Completo Titular B',
@@ -183,3 +185,8 @@ export const generatePeriods = (year, ordinario) => {
         return generateFormat(month1, month2)
     })
 }
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+export const supabase = createClient(supabaseUrl, supabaseKey);
