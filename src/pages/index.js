@@ -1,6 +1,6 @@
 import { Activity } from "@/components/Activity";
 import { StoredContext } from "@/context";
-import { defaultActivity, generatePeriods, puestos, titulos } from "@/utils";
+import { defaultActivity, generatePeriods, puestos, supabase, titulos } from "@/utils";
 import { Accordion, AccordionItem, Badge, BreadcrumbItem, Breadcrumbs, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Select, SelectItem, SelectSection } from "@nextui-org/react";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -9,7 +9,31 @@ export default function Index() {
   const year = new Date().getFullYear()
   const years = Array.from({ length: 5 }, (_, k) => `${year - k + 1}`)
   const [selectedYear, setSelectedYear] = useState(year)
+  const [iderror, setIdError] = useState(false)
   const { memory: { record, selectedItem }, setStored } = StoredContext()
+  const handleChangeFromSupabase = async (e) => {
+    const supaPromise = supabase.from('dpersonales').select('ide,nombre,puesto,area').eq('ide', e.target?.value)
+    if (e.target?.value === '') return console.log('No value')
+    toast.promise(supaPromise, {
+      loading: 'Buscando número de trabajador',
+      success: ({ data, error }) => {
+        if (error) {
+          return 'Error al buscar el número de trabajador'
+        }
+        if (data.length > 0) {
+          setIdError(false)
+          setStored({ record: { ...record, nt: data[0].ide, puesto: data[0].puesto, nombres: data[0].nombre } })
+          return 'Número de trabajador encontrado'
+        } else {
+          setIdError(true)
+          return 'No se encontró el número de trabajador'
+        }
+      },
+      error: 'Error, intente de nuevo más tarde'
+    }, {
+      id: 'ide-error'
+    })
+  }
   const handleChange = (e) => {
     setStored({ record: { ...record, [e.target?.name]: e.target?.value } })
   }
@@ -36,17 +60,30 @@ export default function Index() {
       selectedItem: `act-${record.actividades.length}`
     })
   }
-
+  const getPuesto = (puesto) => {
+    if (puesto == "") return []
+    if (!puestos.includes(puesto)) {
+      puestos.push(puesto)
+      return [puesto]
+    }
+    return [record?.puesto]
+  }
+  const [locked, setLocked] = useState(false)
   return (
     <div className="flex flex-col items-center justify-center">
       <div className="flex-col object-fill w-5/6 sm:w-2/3 pt-5 mt-5">
         <form className="flex flex-col gap-2">
           <div className="flex gap-2">
             <Input label="N." type="number" name="no" onChange={handleChange} />
-            <Input label="N.T." type="number" name="nt" onChange={handleChange} />
+            <Input label="N.T." type="number" name="nt" onChange={handleChangeFromSupabase} color={iderror ? "warning" : "default"} isDisabled={locked} />
+            <Button size="sm" isIconOnly className="w-1/5" color={locked ? "primary" : "default"} onClick={() => setLocked((e) => !e)}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+              </svg>
+            </Button>
           </div>
           <div className="flex gap-2" >
-            <Select label='Título' name="titulo" onChange={handleChange}>
+            <Select defaultSelectedKeys={record.titulo == "" ? [] : [record.titulo]} label='Título' name="titulo" onChange={handleChange}>
               {
                 titulos.map((titulo) => {
                   return <SelectItem key={titulo} variant="flat">{titulo}</SelectItem>
@@ -58,7 +95,7 @@ export default function Index() {
               <SelectItem key={'M'} variant="flat">M</SelectItem>
             </Select>
           </div>
-          <Select label='Puesto' name='puesto' onChange={handleChange}>
+          <Select selectedKeys={getPuesto(record?.puesto)} label='Puesto' name='puesto' onChange={handleChange}>
             <SelectSection title={'Profesor de Tiempo Completo'}>
               {puestos.filter(p => p.includes('Profesor de Tiempo Completo')).map((p) => <SelectItem key={p} textValue={p} variant="flat">{p.replace('Profesor de Tiempo Completo ', '')}</SelectItem>)}
             </SelectSection>
@@ -66,9 +103,7 @@ export default function Index() {
               {puestos.filter(p => !p.includes('Profesor de Tiempo Completo')).map((p) => <SelectItem key={p} textValue={p} variant="flat">{p}</SelectItem>)}
             </SelectSection>
           </Select>
-          <Input isRequired label="Apellido Paterno" type="text" name="apellido_paterno" onChange={handleChange} />
-          <Input isRequired label="Apellido Materno" type="text" name="apellido_materno" onChange={handleChange} />
-          <Input isRequired label="Nombres" type="text" name="nombres" onChange={handleChange} />
+          <Input isRequired label="Nombres" type="text" name="nombre" onChange={handleChange} value={record?.nombres} />
           <div className="flex flex-col sm:flex-row gap-2">
             <Select label='Año' className="md:w-2/5" onChange={(e) => {
               setSelectedYear(e.target.value)

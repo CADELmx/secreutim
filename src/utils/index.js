@@ -1,11 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 
 export const puestos = [
-    'Profesor de Tiempo Completo Titular A',
-    'Profesor de Tiempo Completo Titular B',
-    'Profesor de Tiempo Completo Asociado A',
-    'Profesor de Tiempo Completo Asociado B',
-    'Profesor de Tiempo Completo Asociado C',
+    'Profesor de Tiempo Completo Titular "A"',
+    'Profesor de Tiempo Completo Titular "B"',
+    'Profesor de Tiempo Completo Asociado "A"',
+    'Profesor de Tiempo Completo Asociado "B"',
+    'Profesor de Tiempo Completo Asociado "C"',
     'Profesor por asignatura B',
     'Técnico Académico',
 ]
@@ -151,9 +151,7 @@ export const defaultRecord = {
     no: 0,
     nt: 0,
     titulo: "",
-    apellido_paterno: "",
-    apellido_materno: "",
-    nombres: "",
+    nombre: "",
     sexo: "",
     puesto: "",
     actividades: [
