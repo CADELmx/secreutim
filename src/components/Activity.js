@@ -1,5 +1,5 @@
 import { StoredContext } from '@/context'
-import { defaultGroups, distribucionActividades, programasEducativos } from '@/utils'
+import { checkEmptyStringOption, defaultGroups, distribucionActividades, programasEducativos } from '@/utils'
 import { Button, Input, Select, SelectItem, Textarea } from '@nextui-org/react'
 
 export const Activity = ({ act }) => {
@@ -31,7 +31,7 @@ export const Activity = ({ act }) => {
     return (
         <div onChange={handleChange} className='flex flex-col gap-2'>
             <div className='flex flex-col md:flex-row gap-2'>
-                <Select className='md:w-3/5' label="Distribución de actividades" onChange={handleChange} name="distribucion_actividades" defaultSelectedKeys={[act?.distribucion_actividades]}>
+                <Select className='md:w-3/5' label="Distribución de actividades" onChange={handleChange} name="distribucion_actividades" defaultSelectedKeys={checkEmptyStringOption(act?.distribucion_actividades)}>
                     {
                         distribucionActividades.map((a) => {
                             return <SelectItem key={a} variant="flat">{a}</SelectItem>
@@ -41,7 +41,7 @@ export const Activity = ({ act }) => {
                 <Input label="Nombre de actividades" type="text" name="nombre_actividades" isRequired defaultValue={act.nombre_actividades} />
             </div>
             <div className="flex flex-col md:flex-row gap-2">
-                <Select className="md:w-2/5" label='Programa educativo' name='pe' defaultSelectedKeys={[act.pe?.siglas]} onSelectionChange={(e) => {
+                <Select className="md:w-2/5" label='Programa educativo' name='pe' defaultSelectedKeys={checkEmptyStringOption(act.pe?.siglas)} onSelectionChange={(e) => {
                     setStored({
                         record: {
                             ...record, actividades: acts.map((a) => a.id === act.id ? {
