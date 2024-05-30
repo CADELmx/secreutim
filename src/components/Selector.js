@@ -20,7 +20,7 @@ export const PeriodSelector = ({ selectedYear }) => {
         <Select label='Periodo' autoCapitalize="words">
             <SelectSection title={'Ordinario'}>
                 {
-                    generatePeriods(selectedYear).map(p => {
+                    generatePeriods(selectedYear, true).map(p => {
                         return <SelectItem key={p} variant="flat">{p}</SelectItem>
                     })
                 }

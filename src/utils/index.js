@@ -6,7 +6,7 @@ export const puestos = [
     'Profesor de Tiempo Completo Asociado "A"',
     'Profesor de Tiempo Completo Asociado "B"',
     'Profesor de Tiempo Completo Asociado "C"',
-    'Profesor por asignatura B',
+    'Profesor por asignatura "B"',
     'Técnico Académico',
 ]
 

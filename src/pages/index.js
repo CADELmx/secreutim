@@ -7,7 +7,6 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function Index() {
-  console.log(nuevasCarreras)
   const year = new Date().getFullYear()
   const years = Array.from({ length: 5 }, (_, k) => `${year - k + 1}`)
   const [selectedYear, setSelectedYear] = useState(year)
@@ -38,6 +37,7 @@ export default function Index() {
   }
   const handleChange = (e) => {
     setStored({ record: { ...record, [e.target?.name]: e.target?.value } })
+    console.log(record)
   }
   const handleCreate = () => {
     if (record.actividades[0].id === `act-${record.actividades.length}`) {
@@ -76,8 +76,8 @@ export default function Index() {
       <div className="flex-col object-fill w-5/6 sm:w-2/3 pt-5 mt-5">
         <form className="flex flex-col gap-2">
           <div className="flex gap-2">
-            <Input label="N." type="number" name="no" onChange={handleChange} />
-            <Input label="N.T." type="number" name="nt" onChange={handleChangeFromSupabase} color={idError ? "warning" : "default"} isDisabled={locked} />
+            <Input label="N." type="number" min={1} name="no" onChange={handleChange} />
+            <Input label="N.T." type="number" min={1} name="nt" onChange={handleChangeFromSupabase} color={idError ? "warning" : "default"} isDisabled={locked} />
             <Button size="sm" isIconOnly className="w-1/5" color={locked ? "primary" : "default"} onClick={() => setLocked((e) => !e)}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
@@ -98,12 +98,9 @@ export default function Index() {
             </Select>
           </div>
           <Select selectedKeys={getPuesto(record?.puesto)} label='Puesto' name='puesto' onChange={handleChange}>
-            <SelectSection title={'Profesor de Tiempo Completo'}>
-              {puestos.filter(p => p.includes('Profesor de Tiempo Completo')).map((p) => <SelectItem key={p} textValue={p} variant="flat">{p.replace('Profesor de Tiempo Completo ', '')}</SelectItem>)}
-            </SelectSection>
-            <SelectSection title={'Otros'}>
-              {puestos.filter(p => !p.includes('Profesor de Tiempo Completo')).map((p) => <SelectItem key={p} textValue={p} variant="flat">{p}</SelectItem>)}
-            </SelectSection>
+            {
+              puestos.map((p) => <SelectItem key={p} textValue={p} variant="flat">{p}</SelectItem>)
+            }
           </Select>
           <Input isRequired label="Nombres" type="text" name="nombre" onChange={handleChange} value={record?.nombres} />
           <div className="flex flex-col sm:flex-row gap-2">
@@ -164,7 +161,6 @@ export default function Index() {
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
               </svg>
-
             } title='Detalles de la actividad'>
               {
                 record.actividades.filter((e) => e.id == selectedItem).map((act, i) => {
@@ -182,7 +178,7 @@ export default function Index() {
             Agregar actividad
           </Button>
           <Input label="Subtotal por clasificación" type="number" name="subtotal_clasificacion" onChange={handleChange} />
-          <Input label="Total" type="number" name="total" onChange={handleChange} />
+          <Input label="Total" type="number" min={0} name="total" onChange={handleChange} />
           <Button startContent={
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
