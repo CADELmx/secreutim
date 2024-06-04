@@ -1,3 +1,4 @@
+import { StoredContext } from "@/context"
 import { generatePeriods } from "@/utils"
 import { Select, SelectItem, SelectSection } from "@nextui-org/react"
 
@@ -16,8 +17,30 @@ export const YearSelector = ({ yearList, setState }) => {
 }
 
 export const PeriodSelector = ({ selectedYear }) => {
+    const { setStored } = StoredContext()
+    const handleChange = (e) => {
+        const option = e.target.value
+        const opts = [
+            {
+                periodo: "enero - abril",
+                grados: ['2', '5', '8'],
+            },
+            {
+                periodo: "mayo - agosto",
+                grados: ['3', '6', '9'],
+            },
+            {
+                periodo: "septiembre - diciembre",
+                grados: ['1', '4', '7'],
+            }
+        ]
+        const groups = opts.find(opt => {
+            return option.includes(opt.periodo)
+        })
+        setStored({ defaultGroups: groups.grados.map(g=>[`${g}A`, `${g}B`, `${g}C`]).flat() })
+    }
     return (
-        <Select label='Periodo' autoCapitalize="words">
+        <Select label='Periodo' autoCapitalize="words" onChange={handleChange}>
             <SelectSection title={'Ordinario'}>
                 {
                     generatePeriods(selectedYear, true).map(p => {

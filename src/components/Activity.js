@@ -1,9 +1,9 @@
 import { StoredContext } from '@/context'
-import { checkEmptyStringOption, defaultGroups, distribucionActividades, programasEducativos } from '@/utils'
+import { checkEmptyStringOption, distribucionActividades, programasEducativos } from '@/utils'
 import { Button, Input, Select, SelectItem, Textarea } from '@nextui-org/react'
 
 export const Activity = ({ act }) => {
-    const { memory: { record, selectedItem }, setStored } = StoredContext()
+    const { memory: { record, defaultGroups, selectedItem }, setStored } = StoredContext()
     const { actividades: acts } = record
     const handleChange = (e) => {
         const actividades = acts.map((a) => {
@@ -61,7 +61,8 @@ export const Activity = ({ act }) => {
                 <Textarea minRows={1} size="sm" radius="md" isReadOnly label='Detalles PE' isDisabled value={act.pe?.descripcion} />
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-                <Select label="Grados y grupos" name="grados_grupos" value={'ddd'} selectionMode="multiple" defaultSelectedKeys={act.grados_grupos} onSelectionChange={(e) => {
+                <Select label="Grados y grupos" name="grados_grupos" selectionMode="multiple" defaultSelectedKeys={act.grados_grupos} onSelectionChange={(e) => {
+                    console.log(Array.from(e))
                     setStored({
                         record: { ...record, actividades: acts.map((a) => a.id === act.id ? { ...a, grados_grupos: Array.from(e) } : a) }
                     })
