@@ -1,4 +1,4 @@
-import { Layout } from '@/components/layout'
+import { Layout } from '@/components/Layout'
 import { ContextProvider } from '@/context'
 import '@/styles/globals.css'
 import Notify from '@/toast'

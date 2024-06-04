@@ -78,7 +78,7 @@ export const programasEducativos = [
         "descripcion": "Técnico Superior Universitario en Lengua Inglesa Despresurizado"
     },
     {
-        "siglas": "PAL",
+        "siglas": "TPAL",
         "descripcion": "Técnico Superior Universitario en Procesos Alimentarios"
     },
     {
@@ -163,8 +163,6 @@ export const programasEducativos = [
     }
 ]
 
-export const defaultGroups = Array.from({ length: 8 }, (_, k) => [`${k + 1}A`, `${k + 1}B`, `${k + 1}C`]).flat()
-
 export const defaultActivity = {
     id: 'act-0',
     pe: {
@@ -178,9 +176,7 @@ export const defaultActivity = {
 }
 
 export const defaultRecord = {
-    no: 0,
     nt: 0,
-    titulo: "",
     nombre: "",
     sexo: "",
     puesto: "",

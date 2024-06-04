@@ -1,14 +1,14 @@
 import { Activity } from "@/components/Activity";
 import { PeriodSelector, YearSelector } from "@/components/Selector";
 import { StoredContext } from "@/context";
-import { checkEmptyStringOption, defaultActivity, nuevasCarreras, puestos, supabase, titulos } from "@/utils";
-import { Accordion, AccordionItem, Badge, BreadcrumbItem, Breadcrumbs, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Select, SelectItem, SelectSection } from "@nextui-org/react";
+import { checkEmptyStringOption, defaultActivity, puestos, supabase, titulos } from "@/utils";
+import { Accordion, AccordionItem, Badge, BreadcrumbItem, Breadcrumbs, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Select, SelectItem } from "@nextui-org/react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function Index() {
   const year = new Date().getFullYear()
-  const years = Array.from({ length: 5 }, (_, k) => `${year - k + 1}`)
+  const years = Array.from({ length: 3 }, (_, k) => `${year - k + 1}`)
   const [selectedYear, setSelectedYear] = useState(year)
   const [idError, setIdError] = useState(false)
   const { memory: { record, selectedItem }, setStored } = StoredContext()
@@ -24,6 +24,7 @@ export default function Index() {
         if (data.length > 0) {
           setIdError(false)
           setStored({ record: { ...record, nt: data[0].ide, puesto: data[0].puesto, nombres: data[0].nombre } })
+          setLocked(true)
           return 'Número de trabajador encontrado'
         } else {
           setIdError(true)
@@ -76,22 +77,20 @@ export default function Index() {
       <div className="flex-col object-fill w-5/6 sm:w-2/3 pt-5 mt-5">
         <form className="flex flex-col gap-2">
           <div className="flex gap-2">
-            <Input label="N." type="number" min={1} name="no" onChange={handleChange} />
             <Input label="N.T." type="number" min={1} name="nt" onChange={handleChangeFromSupabase} color={idError ? "warning" : "default"} isDisabled={locked} />
             <Button size="sm" isIconOnly className="w-1/5" color={locked ? "primary" : "default"} onClick={() => setLocked((e) => !e)}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+              {locked ? (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-              </svg>
+              </svg>) : (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                </svg>
+
+              )}
             </Button>
           </div>
           <div className="flex gap-2" >
-            <Select defaultSelectedKeys={checkEmptyStringOption(record.titulo)} label='Título' name="titulo" onChange={handleChange}>
-              {
-                titulos.map((titulo) => {
-                  return <SelectItem key={titulo} variant="flat">{titulo}</SelectItem>
-                })
-              }
-            </Select>
+            <Input isRequired label="Nombres" type="text" name="nombre" onChange={handleChange} value={record?.nombres} />
             <Select className="w-40" label="Sexo" name="sexo" onChange={handleChange}>
               <SelectItem key={'H'} variant="flat">H</SelectItem>
               <SelectItem key={'M'} variant="flat">M</SelectItem>
@@ -102,13 +101,12 @@ export default function Index() {
               puestos.map((p) => <SelectItem key={p} textValue={p} variant="flat">{p}</SelectItem>)
             }
           </Select>
-          <Input isRequired label="Nombres" type="text" name="nombre" onChange={handleChange} value={record?.nombres} />
           <div className="flex flex-col sm:flex-row gap-2">
             <YearSelector setState={setSelectedYear} yearList={years}></YearSelector>
             <PeriodSelector selectedYear={selectedYear}></PeriodSelector>
           </div>
           <Accordion showDivider={false} isCompact fullWidth selectionMode="multiple">
-            <AccordionItem title='Actividades' startContent={<Badge color="primary" content={record.actividades.length}>
+            <AccordionItem title='Carga académica' startContent={<Badge color="primary" content={record.actividades.length}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3" />
               </svg>
@@ -161,7 +159,7 @@ export default function Index() {
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
               </svg>
-            } title='Detalles de la actividad'>
+            } title='Detalles de carga académica'>
               {
                 record.actividades.filter((e) => e.id == selectedItem).map((act, i) => {
                   return <Activity key={act.id} act={act} />
