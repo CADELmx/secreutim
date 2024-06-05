@@ -97,8 +97,7 @@ export default function Index({ programasEducativos, academicWorkers }) {
             </AccordionItem>
           </Accordion>
           <AddActivityButton />
-          <Input label="Subtotal por clasificación" type="number" name="subtotal_clasificacion" onChange={handleGlobalChange} />
-          <Input label="Total" type="number" min={0} name="total" onChange={handleGlobalChange} />
+          <Input label="Total" type="number" min={0} name="total" value={record.actividades.map(e => e.subtotal_clasificacion).reduce((p, c) => p + c, 0)} onChange={handleGlobalChange} />
           <Button startContent={
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />

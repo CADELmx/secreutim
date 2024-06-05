@@ -174,6 +174,7 @@ export const defaultActivity = {
     nombre_actividades: "",
     grados_grupos: [],
     horas_semanales: 0,
+    subtotal_clasificacion: 0,
 }
 
 export const defaultRecord = {
@@ -184,7 +185,6 @@ export const defaultRecord = {
     actividades: [
         defaultActivity
     ],
-    subtotal_clasificacion: 0,
     total: 0,
 }
 

@@ -33,7 +33,7 @@ export const Activity = ({ act, eduPrograms }) => {
         })
     }
     return (
-        <div onChange={handleChange} className='flex flex-col gap-2'>
+        <div className='flex flex-col gap-2'>
             <div className='flex flex-col md:flex-row gap-2'>
                 <Select className='md:w-3/5' label="Distribución de actividades" onChange={handleChange} name="distribucion_actividades" defaultSelectedKeys={checkEmptyStringOption(act?.distribucion_actividades)}>
                     {
@@ -67,7 +67,7 @@ export const Activity = ({ act, eduPrograms }) => {
             <div className="flex flex-col gap-2 sm:flex-row">
                 <Select label="Grados y grupos" name="grados_grupos" selectionMode="multiple" description="Selección múltiple" defaultSelectedKeys={act.grados_grupos} onSelectionChange={(e) => {
                     setStored({
-                        record: { ...record, actividades: acts.map((a) => a.id === act.id ? { ...a, grados_grupos: Array.from(e) } : a) }
+                        record: { ...record, actividades: acts.map((a) => a.id === act.id ? { ...a, grados_grupos: Array.from(e), subtotal_clasificacion: Array.from(e).length * act.horas_semanales } : a) }
                     })
                 }}
                 >
@@ -79,7 +79,17 @@ export const Activity = ({ act, eduPrograms }) => {
                 </Select>
                 <Input className="md:w-1/3" isReadOnly label='Nº de grupos' value={act.grados_grupos.length === 0 ? '' : act.grados_grupos.length} isDisabled />
             </div>
-            <Input label="Horas semanales" type="number" name="horas_semanales" defaultValue={act.horas_semanales} />
+            <Input label="Horas semanales" type="number" name="horas_semanales" min={1} defaultValue={act.horas_semanales} onChange={(e) => {
+                const subtotal_clasificacion = act.grados_grupos.length === 0 || e.target.value === '' ? '' : act.grados_grupos.length * Number(e.target.value)
+                setStored({
+                    record: {
+                        ...record, actividades: acts.map(
+                            (a) => a.id === act.id ? { ...a, [e.target.name]: e.target.value, subtotal_clasificacion } : a)
+                    }
+                })
+            }} />
+
+            <Input label="Subtotal por clasificación" type="number" name="subtotal_clasificacion" value={act.subtotal_clasificacion === 0 ? '' : act.subtotal_clasificacion} isDisabled />
             {
                 acts.length > 1 && <Button color='danger' onClick={handleDelete}>
                     Eliminar actividad
