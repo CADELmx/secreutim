@@ -17,8 +17,10 @@ module.exports = {
         btn: {
           background: "hsl(var(--btn-background))",
           foreground: "hsl(var(--foreground))",
-          "background-hover": "hsl(var(--btn-background-hover))",
+          "background-hover": "hsl(var(--btn-background-hover))"
         },
+        utim:"#309b7b",
+        utimhover:"#00a887",
       },
     },
   },

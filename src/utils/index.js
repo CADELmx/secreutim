@@ -1,3 +1,4 @@
+import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 
 export const puestos = [
@@ -6,8 +7,8 @@ export const puestos = [
     'Profesor de Tiempo Completo Asociado "A"',
     'Profesor de Tiempo Completo Asociado "B"',
     'Profesor de Tiempo Completo Asociado "C"',
-    'Profesor por asignatura "B"',
-    'Técnico Académico',
+    'Profesor de asignatura "B"',
+    'Técnico de Apoyo',
 ]
 
 export const titulos = [
@@ -210,9 +211,7 @@ export const generatePeriods = (year, ordinario) => {
     })
 }
 
-export const checkEmptyStringOption = (string) => {
-    string == "" ? [] : [string]
-}
+export const checkEmptyStringOption = (string) => string === "" ? [] : [string]
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
