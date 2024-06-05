@@ -12,9 +12,16 @@ export const ContextProvider = ({ children }) => {
         selectedItem: 'act-0'
     })
     const setStored = (prop) => setMemory((prev) => ({ ...prev, ...prop }))
+    const handleGlobalChange = (event) => setStored({
+        record: {
+            ...memory.record,
+            [event.target?.name]: event.target?.value
+        }
+    })
     const ctx = {
         memory,
-        setStored
+        setStored,
+        handleGlobalChange
     }
     return (
         <Context.Provider value={ctx}>
