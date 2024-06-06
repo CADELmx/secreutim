@@ -1,17 +1,15 @@
 import { StoredContext } from '@/context'
 import { checkEmptyStringOption, defaultActivity, distribucionActividades } from '@/utils'
 import { Button, Input, Select, SelectItem, Textarea } from '@nextui-org/react'
+import { randomUUID } from 'crypto'
+import toast from 'react-hot-toast'
 
 export const Activity = ({ act, eduPrograms }) => {
     const { memory: { record, defaultGroups, selectedItem }, setStored } = StoredContext()
     const { actividades: acts } = record
     const handleChange = (e) => {
         const actividades = acts.map((a) => {
-            if (a.id === act.id) {
-                return { ...a, [e.target.name]: e.target.value }
-            } else {
-                return a
-            }
+            return (a.id === selectedItem) ? { ...a, [e.target.name]: e.target.value } : a
         })
         setStored({
             record: {
@@ -20,12 +18,8 @@ export const Activity = ({ act, eduPrograms }) => {
         })
     }
     const handleDelete = () => {
-        if (selectedItem === 'act-0' && acts.length > 1) {
-            setStored({ selectedItem: `act-${acts.length + 1}` })
-        } else {
-            setStored({ selectedItem: `act-${acts.length - 2}` })
-        }
         setStored({
+            selectedItem: acts.length > 1 ? acts[acts.length - 2].id : acts[0].id,
             record: {
                 ...record,
                 actividades: acts.filter((a) => a.id !== act.id)
@@ -48,7 +42,7 @@ export const Activity = ({ act, eduPrograms }) => {
                 <Select className="md:w-2/5" label='Programa educativo' name='pe' defaultSelectedKeys={checkEmptyStringOption(act.pe?.siglas)} onSelectionChange={(e) => {
                     setStored({
                         record: {
-                            ...record, actividades: acts.map((a) => a.id === act.id ? {
+                            ...record, actividades: acts.map((a) => (a.id === selectedItem) ? {
                                 ...a, pe: e.size === 0 ? {
                                     siglas: "",
                                     descripcion: "",
@@ -67,7 +61,8 @@ export const Activity = ({ act, eduPrograms }) => {
             <div className="flex flex-col gap-2 sm:flex-row">
                 <Select label="Grados y grupos" name="grados_grupos" selectionMode="multiple" description="Selección múltiple" defaultSelectedKeys={act.grados_grupos} onSelectionChange={(e) => {
                     setStored({
-                        record: { ...record, actividades: acts.map((a) => a.id === act.id ? { ...a, grados_grupos: Array.from(e), subtotal_clasificacion: Array.from(e).length * act.horas_semanales } : a) }
+                        record: { ...record, actividades: acts.map((a) => a.id === selectedItem ?{
+                            ...a, grados_grupos: Array.from(e), subtotal_clasificacion: Array.from(e).length * act.horas_semanales } : a) }
                     })
                 }}
                 >
@@ -103,26 +98,21 @@ export const AddActivityButton = () => {
     const { memory: { record }, setStored } = StoredContext()
     const { actividades } = record
     const handleCreate = () => {
-        const newGlobalState =
-            actividades[0].id === `act-${actividades.length}` ?
-                {
-                    record: {
-                        ...record, actividades: [...actividades, {
-                            ...defaultActivity,
-                            id: `act-${actividades.length + 1}`
-                        }]
-                    },
-                    selectedItem: `act-${actividades.length + 1}`
-                } : {
-                    record: {
-                        ...record, actividades: [...actividades, {
-                            ...defaultActivity,
-                            id: `act-${actividades.length}`
-                        }]
-                    },
-                    selectedItem: `act-${actividades.length}`
-                }
-        setStored(newGlobalState)
+        if (actividades.length >= 10) {
+            return toast.error('No puedes agregar más carga academica',{
+                id: 'max-activities'
+            })
+        }
+        const uuid = crypto.randomUUID()
+        setStored({
+            record: {
+                ...record, actividades: [...actividades, {
+                    ...defaultActivity,
+                    id: uuid
+                }]
+            },
+            selectedItem: uuid
+        })
     }
     return (
         <Button startContent={
