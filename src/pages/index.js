@@ -1,67 +1,15 @@
-import { Activity } from "@/components/Activity";
-import { PeriodSelector, YearSelector } from "@/components/Selector";
-import { StoredContext } from "@/context";
-import { checkEmptyStringOption, defaultActivity, nuevasCarreras, puestos, supabase, titulos } from "@/utils";
-import { Accordion, AccordionItem, Badge, BreadcrumbItem, Breadcrumbs, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Select, SelectItem, SelectSection } from "@nextui-org/react";
-import { useState } from "react";
-import toast from "react-hot-toast";
 
-export default function Index() {
-  const year = new Date().getFullYear()
-  const years = Array.from({ length: 5 }, (_, k) => `${year - k + 1}`)
-  const [selectedYear, setSelectedYear] = useState(year)
-  const [idError, setIdError] = useState(false)
-  const { memory: { record, selectedItem }, setStored } = StoredContext()
-  const handleChangeFromSupabase = async (e) => {
-    const supaPromise = supabase.from('dpersonales').select('ide,nombre,puesto,area').eq('ide', e.target?.value)
-    if (e.target?.value === '') return console.log('No value')
-    toast.promise(supaPromise, {
-      loading: 'Buscando número de trabajador',
-      success: ({ data, error }) => {
-        if (error) {
-          return 'Error al buscar el número de trabajador'
-        }
-        if (data.length > 0) {
-          setIdError(false)
-          setStored({ record: { ...record, nt: data[0].ide, puesto: data[0].puesto, nombres: data[0].nombre } })
-          return 'Número de trabajador encontrado'
-        } else {
-          setIdError(true)
-          return 'No se encontró el número de trabajador'
-        }
-      },
-      error: 'Error, intente de nuevo más tarde'
-    }, {
-      id: 'ide-error'
-    })
-  }
-  const handleChange = (e) => {
-    setStored({ record: { ...record, [e.target?.name]: e.target?.value } })
-    console.log(record)
-  }
-  const handleCreate = () => {
-    if (record.actividades[0].id === `act-${record.actividades.length}`) {
-      setStored({
-        record: {
-          ...record, actividades: [...record.actividades, {
-            ...defaultActivity,
-            id: `act-${record.actividades.length + 1}`
-          }]
-        },
-        selectedItem: `act-${record.actividades.length + 1}`
-      })
-      return
-    }
-    setStored({
-      record: {
-        ...record, actividades: [...record.actividades, {
-          ...defaultActivity,
-          id: `act-${record.actividades.length}`
-        }]
-      },
-      selectedItem: `act-${record.actividades.length}`
-    })
-  }
+import { AcademicCharge } from "@/components/AcademicCharge";
+import { AddActivityButton } from "@/components/Activity";
+import { YearAndPeriodSelector } from "@/components/Selector";
+import { NtInput } from "@/components/WorkerNumber";
+import { StoredContext } from "@/context";
+import { puestos, supabase } from "@/utils";
+import socket from "@/utils/socket";
+import { Button, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
+
+export default function Index({ programasEducativos, academicWorkers }) {
+  const { memory: { record }, handleGlobalChange } = StoredContext()
   const getPuesto = (puesto) => {
     if (puesto == "") return []
     if (!puestos.includes(puesto)) {
@@ -70,121 +18,35 @@ export default function Index() {
     }
     return [record?.puesto]
   }
-  const [locked, setLocked] = useState(false)
+  const totalHoras = record.actividades.map(e => e.subtotal_clasificacion).reduce((p, c) => p + c, 0)
+
   return (
     <div className="flex flex-col items-center justify-center">
       <div className="flex-col object-fill w-5/6 sm:w-2/3 pt-5 mt-5">
         <form className="flex flex-col gap-2">
-          <div className="flex gap-2">
-            <Input label="N." type="number" min={1} name="no" onChange={handleChange} />
-            <Input label="N.T." type="number" min={1} name="nt" onChange={handleChangeFromSupabase} color={idError ? "warning" : "default"} isDisabled={locked} />
-            <Button size="sm" isIconOnly className="w-1/5" color={locked ? "primary" : "default"} onClick={() => setLocked((e) => !e)}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-              </svg>
-            </Button>
-          </div>
+          <NtInput academicWorkers={academicWorkers} />
           <div className="flex gap-2" >
-            <Select defaultSelectedKeys={checkEmptyStringOption(record.titulo)} label='Título' name="titulo" onChange={handleChange}>
-              {
-                titulos.map((titulo) => {
-                  return <SelectItem key={titulo} variant="flat">{titulo}</SelectItem>
-                })
-              }
-            </Select>
-            <Select className="w-40" label="Sexo" name="sexo" onChange={handleChange}>
+            <Textarea minRows={1} size="sm" radius="md" isRequired label="Nombre" type="text" name="nombre" onChange={handleGlobalChange} value={record?.nombres} />
+            <Select className="w-40" label="Sexo" name="sexo" onChange={handleGlobalChange}>
               <SelectItem key={'H'} variant="flat">H</SelectItem>
               <SelectItem key={'M'} variant="flat">M</SelectItem>
             </Select>
           </div>
-          <Select selectedKeys={getPuesto(record?.puesto)} label='Puesto' name='puesto' onChange={handleChange}>
+          <Select selectedKeys={getPuesto(record?.puesto)} label='Puesto' name='puesto' onChange={handleGlobalChange}>
             {
               puestos.map((p) => <SelectItem key={p} textValue={p} variant="flat">{p}</SelectItem>)
             }
           </Select>
-          <Input isRequired label="Nombres" type="text" name="nombre" onChange={handleChange} value={record?.nombres} />
-          <div className="flex flex-col sm:flex-row gap-2">
-            <YearSelector setState={setSelectedYear} yearList={years}></YearSelector>
-            <PeriodSelector selectedYear={selectedYear}></PeriodSelector>
-          </div>
-          <Accordion showDivider={false} isCompact fullWidth selectionMode="multiple">
-            <AccordionItem title='Actividades' startContent={<Badge color="primary" content={record.actividades.length}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3" />
-              </svg>
-            </Badge>}>
-              <Breadcrumbs onAction={(key) => setStored({ selectedItem: key })} variant="light" itemsBeforeCollapse={1} itemsAfterCollapse={2} separator={','} classNames={{
-                list: "gap-2",
-              }} itemClasses={{
-                item: [
-                  "px-2 py-0.5 border-small border-default-400 rounded-small",
-                  "data-[current=true]:border-foreground data-[current=true]:bg-foreground data-[current=true]:text-background transition-colors",
-                  "data-[disabled=true]:border-default-400 data-[disabled=true]:bg-default-100",
-                ],
-                separator: "hidden",
-              }} renderEllipsis={({ items, ellipsisIcon, separator }) => {
-                return (
-                  <Dropdown>
-                    <DropdownTrigger>
-                      <Button isIconOnly color="primary" className="min-w-unit-6 w-unit-6 h-unit-6" size="sm" variant="solid">
-                        {ellipsisIcon}
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu key={'d'}>
-                      {
-                        items.map((e, i) => (
-                          <DropdownItem key={i + 1} onClick={() => {
-                            setStored({ selectedItem: `act-${i + 1}` })
-                          }}>
-                            {e.children}
-                          </DropdownItem>
-                        ))
-                      }
-                    </DropdownMenu>
-                  </Dropdown>
-                )
-              }}>
-                {
-                  record.actividades.map((e, i) => {
-                    return (
-                      <BreadcrumbItem key={e.id} isCurrent={e.id == selectedItem}>
-                        {
-                          e.id.replace('act-', 'Actividad ')
-                        }
-                      </BreadcrumbItem>
-                    )
-                  })
-                }
-              </Breadcrumbs>
-            </AccordionItem>
-            <AccordionItem startContent={
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-              </svg>
-            } title='Detalles de la actividad'>
-              {
-                record.actividades.filter((e) => e.id == selectedItem).map((act, i) => {
-                  return <Activity key={act.id} act={act} />
-                })
-              }
-            </AccordionItem>
-          </Accordion>
-          <Button startContent={
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-
-          } className="w-full" variant="solid" color="primary" onClick={handleCreate}>
-            Agregar actividad
-          </Button>
-          <Input label="Subtotal por clasificación" type="number" name="subtotal_clasificacion" onChange={handleChange} />
-          <Input label="Total" type="number" min={0} name="total" onChange={handleChange} />
+          <YearAndPeriodSelector />
+          <AcademicCharge programasEducativos={programasEducativos} />
+          <AddActivityButton />
+          <Input label="Total" type="number" min={0} name="total" value={totalHoras == 0 ? '' : totalHoras} isDisabled onChange={handleGlobalChange} />
           <Button startContent={
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
             </svg>
-          } className="w-full" variant="solid" color="success" onClick={() => {
-            toast.loading('Listo')
+          } className="w-full bg-utim" variant="solid" onPress={() => {
+            socket.emit('notify', 'Alguien envió cosas')
           }}>
             Guardar
           </Button>
@@ -192,4 +54,36 @@ export default function Index() {
       </div>
     </div>
   )
+}
+
+export const getStaticProps = async () => {
+  const eduPromise = supabase.from('programaseducativos').select('siglas,descripcion')
+  const acaPromise = supabase.from('dpersonales').select('ide,nombre,puesto,area').likeAnyOf('puesto', [
+    '%asignatura%',
+    '%Tiempo Completo%',
+    '%de Apoyo%',
+  ]).in('area', [
+    'P.E. de Tecnologías de la Información',
+    'P.E. de Lengua Inglesa',
+    'P.E. de Lengua inglesa',
+  ])
+  const promiseResolver = async (promiseList) => {
+    const results = await Promise.allSettled(promiseList)
+    const data = results.map(r => r.value)
+    return data
+  }
+  const [eduData, acaData] = await promiseResolver([eduPromise, acaPromise])
+  if (eduData.error || acaData.error) {
+    return {
+      props: {
+        error: 'Error al cargar los datos'
+      }
+    }
+  }
+  return {
+    props: {
+      programasEducativos: eduData.data,
+      academicWorkers: acaData.data,
+    }
+  }
 }
