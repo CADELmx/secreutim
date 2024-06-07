@@ -1,9 +1,12 @@
-import { Activity, AddActivityButton } from "@/components/Activity";
+import { AcademicCharge } from "@/components/AcademicCharge";
+import { AddActivityButton } from "@/components/Activity";
 import { YearAndPeriodSelector } from "@/components/Selector";
 import { NtInput } from "@/components/WorkerNumber";
 import { StoredContext } from "@/context";
 import { puestos, supabase } from "@/utils";
-import { Accordion, AccordionItem, Badge, BreadcrumbItem, Breadcrumbs, Button, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Select, SelectItem, SelectSection, Textarea } from "@nextui-org/react";
+import socket from "@/utils/socket";
+import { Button, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 
 export default function Index({ programasEducativos, academicWorkers }) {
@@ -17,6 +20,14 @@ export default function Index({ programasEducativos, academicWorkers }) {
     return [record?.puesto]
   }
   const totalHoras = record.actividades.map(e => e.subtotal_clasificacion).reduce((p, c) => p + c, 0)
+  useEffect(() => {
+    socket.on('notify', (data) => {
+      toast.success(data)
+    })
+    return () => {
+      socket.off('notify')
+    }
+  }, [])
   return (
     <div className="flex flex-col items-center justify-center">
       <div className="flex-col object-fill w-5/6 sm:w-2/3 pt-5 mt-5">
@@ -35,71 +46,7 @@ export default function Index({ programasEducativos, academicWorkers }) {
             }
           </Select>
           <YearAndPeriodSelector />
-          <Accordion aria-label="Academic Details" showDivider={false} isCompact fullWidth selectionMode="multiple">
-            <AccordionItem aria-label="Academic Charge" title={<>Carga académica<p className="text-sm text-utim font-semibold tracking-wider">selecciona actividades académicas</p></>} startContent={<Badge color="primary" content={record.actividades.length}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3" />
-              </svg>
-            </Badge>}>
-              <Breadcrumbs variant="light" itemsBeforeCollapse={1} itemsAfterCollapse={2} separator={','} classNames={{
-                list: "gap-2",
-              }} itemClasses={{
-                separator: "hidden",
-              }} renderEllipsis={({ items, ellipsisIcon, separator }) => {
-                return (
-                  <Dropdown className="grid min-w-[10]" aria-label="Item Selector">
-                    <DropdownTrigger aria-label="Dropdown Button">
-                      <Button isIconOnly color={
-                        items.some(e => e.accessKey === selectedItem) ? 'primary' : 'default'
-                      } className="min-w-unit-6 w-unit-6 h-unit-6" size="sm" variant="solid">
-                        {ellipsisIcon}
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu variant="solid" className="m-0" key={'DropdownSelectItem'} aria-label="Dropdown actividades">
-                      {
-                        items.map((e, i) => {
-                          return (
-                            <DropdownItem className="p-0 my-1 w-full grid" color="primary" aria-label={`Select act ${i}`}>
-                              {e.children}
-                            </DropdownItem>
-                          )
-                        })
-                      }
-                    </DropdownMenu>
-                  </Dropdown>
-                )
-              }}>
-                {
-                  record.actividades.map((e, i) => {
-                    return (
-                      <BreadcrumbItem key={e.id} accessKey={e.id} isCurrent={e.id === selectedItem}>
-                        {
-                          <Chip size="sm" accessKey={e.id} onClick={() => {
-                            setStored({ selectedItem: e.id })
-                          }} color={e.id === selectedItem ? 'primary' : 'default'}>
-                            {
-                              `Actividad ${i + 1}`
-                            }
-                          </Chip>
-                        }
-                      </BreadcrumbItem>
-                    )
-                  })
-                }
-              </Breadcrumbs>
-            </AccordionItem>
-            <AccordionItem aria-label="Activity Details" startContent={
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-              </svg>
-            } title='Detalles de carga académica'>
-              {
-                record.actividades.filter((e) => e.id == selectedItem).map((act, i) => {
-                  return <Activity key={act.id} act={act} eduPrograms={programasEducativos} />
-                })
-              }
-            </AccordionItem>
-          </Accordion>
+          <AcademicCharge programasEducativos={programasEducativos} />
           <AddActivityButton />
           <Input label="Total" type="number" min={0} name="total" value={totalHoras == 0 ? '' : totalHoras} isDisabled onChange={handleGlobalChange} />
           <Button startContent={
@@ -107,7 +54,7 @@ export default function Index({ programasEducativos, academicWorkers }) {
               <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
             </svg>
           } className="w-full bg-utim" variant="solid" onPress={() => {
-            toast.loading('Listo')
+            socket.emit('notify', 'Alguien envió cosas')
           }}>
             Guardar
           </Button>
