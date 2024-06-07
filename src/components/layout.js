@@ -1,7 +1,18 @@
+import socket from "@/utils/socket"
 import { Navbar, NavbarBrand, NavbarContent } from "@nextui-org/react"
 import Image from "next/image"
 import logo from "public/utim.png"
+import { useEffect } from "react"
+import toast from "react-hot-toast"
 export const Layout = ({ children }) => {
+    useEffect(() => {
+        socket.on('notify', (data) => {
+            toast.success(data, {
+                icon: '👏',
+                id: 'notify',
+            })
+        })
+    })
     return (
         <>
             <Navbar>

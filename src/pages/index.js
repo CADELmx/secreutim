@@ -6,11 +6,9 @@ import { StoredContext } from "@/context";
 import { puestos, supabase } from "@/utils";
 import socket from "@/utils/socket";
 import { Button, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
-import { useEffect } from "react";
-import toast from "react-hot-toast";
 
 export default function Index({ programasEducativos, academicWorkers }) {
-  const { memory: { record, selectedItem }, setStored, handleGlobalChange } = StoredContext()
+  const { memory: { record }, handleGlobalChange } = StoredContext()
   const getPuesto = (puesto) => {
     if (puesto == "") return []
     if (!puestos.includes(puesto)) {
@@ -20,14 +18,7 @@ export default function Index({ programasEducativos, academicWorkers }) {
     return [record?.puesto]
   }
   const totalHoras = record.actividades.map(e => e.subtotal_clasificacion).reduce((p, c) => p + c, 0)
-  useEffect(() => {
-    socket.on('notify', (data) => {
-      toast.success(data)
-    })
-    return () => {
-      socket.off('notify')
-    }
-  }, [])
+
   return (
     <div className="flex flex-col items-center justify-center">
       <div className="flex-col object-fill w-5/6 sm:w-2/3 pt-5 mt-5">
