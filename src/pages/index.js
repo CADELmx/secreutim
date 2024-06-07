@@ -1,3 +1,4 @@
+
 import { AcademicCharge } from "@/components/AcademicCharge";
 import { AddActivityButton } from "@/components/Activity";
 import { YearAndPeriodSelector } from "@/components/Selector";
