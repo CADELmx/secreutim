@@ -9,7 +9,7 @@ export const ContextProvider = ({ children }) => {
     const [memory, setMemory] = useState({
         record: defaultRecord,
         defaultGroups: [],
-        selectedItem: 'act-0'
+        selectedItem: defaultRecord.actividades[0].id
     })
     const setStored = (prop) => setMemory((prev) => ({ ...prev, ...prop }))
     const handleGlobalChange = (event) => setStored({
