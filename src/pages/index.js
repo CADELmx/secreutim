@@ -5,11 +5,10 @@ import { YearAndPeriodSelector } from "@/components/Selector";
 import { NtInput } from "@/components/WorkerNumber";
 import { StoredContext } from "@/context";
 import { puestos, supabase } from "@/utils";
-import socket from "@/utils/socket";
 import { Button, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
 
 export default function Index({ programasEducativos, academicWorkers }) {
-  const { memory: { record }, handleGlobalChange } = StoredContext()
+  const { memory: { record, socket }, handleGlobalChange } = StoredContext()
   const getPuesto = (puesto) => {
     if (puesto == "") return []
     if (!puestos.includes(puesto)) {

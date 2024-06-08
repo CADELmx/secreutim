@@ -8,6 +8,7 @@ export const StoredContext = () => useContext(Context)
 export const ContextProvider = ({ children }) => {
     const [memory, setMemory] = useState({
         record: defaultRecord,
+        socket: null,
         defaultGroups: [],
         selectedItem: defaultRecord.actividades[0].id
     })

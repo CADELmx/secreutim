@@ -1,18 +1,27 @@
-import socket from "@/utils/socket"
+import { StoredContext } from "@/context"
 import { Navbar, NavbarBrand, NavbarContent } from "@nextui-org/react"
 import Image from "next/image"
 import logo from "public/utim.png"
 import { useEffect } from "react"
 import toast from "react-hot-toast"
+import { io } from "socket.io-client"
 export const Layout = ({ children }) => {
+    const { setStored } = StoredContext()
     useEffect(() => {
-        socket.on('notify', (data) => {
-            toast.success(data, {
-                icon: '👏',
-                id: 'notify',
-            })
-        })
-    })
+        const setupSocket = async () => {
+            try {
+                await fetch('/api/socket')
+                const socket = io()
+                socket.on('notify', (notification) => {
+                    toast.success(notification)
+                })
+                setStored({ socket })
+            } catch (error) {
+                toast.error('Error al conectar con el servidor de notificaciones')
+            }
+        }
+        setupSocket()
+    }, [])
     return (
         <>
             <Navbar>
