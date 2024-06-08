@@ -4,7 +4,7 @@ const next = require("next");
 const hostname = process.env.HOST || "localhost";
 const port = process.env.PORT || 3000;
 const dev = process.env.NODE_ENV !== "production";
-const app = next({ dev, hostname, port });
+const app = next({ dev, hostname, port, customServer: true });
 const handler = app.getRequestHandler();
 
 app.prepare().then(() => {
@@ -23,7 +23,7 @@ app.prepare().then(() => {
             io.emit("notify", notificationObject);
         });
     });
-    httpServer.once("error",(err)=>{
+    httpServer.once("error", (err) => {
         console.error(err);
         process.exit(1);
     }).listen(port, () => {
