@@ -1,7 +1,6 @@
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const next = require("next");
-
 const hostname = process.env.HOST || "localhost";
 const port = process.env.PORT || 3000;
 const dev = process.env.NODE_ENV !== "production";
@@ -13,8 +12,11 @@ app.prepare().then(() => {
     const io = new Server(httpServer, {
         cors: {
             origin: "*",
-            methods: ["GET", "POST"],
+            methods: ["GET", "POST", "OPTIONS"],
+            credentials: true,
         },
+        transports: ["websocket", "polling"],
+        allowEIO3: true,
     });
     io.on("connection", (socket) => {
         socket.on("notify", (notificationObject) => {
