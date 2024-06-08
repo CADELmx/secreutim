@@ -27,7 +27,7 @@ app.prepare().then(() => {
         console.error(err);
         process.exit(1);
     }).listen(port, () => {
-        console.log("Server running on port 4000");
+        console.log(`Server running on http://${hostname}:${port}`);
     });
 })
 
