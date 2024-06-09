@@ -1,4 +1,3 @@
-import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 
 export const puestos = [
@@ -21,11 +20,10 @@ export const titulos = [
 
 export const distribucionActividades = [
     'Docencia',
-    'Atención a estudiantes',
-    'Atención personalizada',
-    'Gestión Institucional',
-    'Desarrollo de material',
-    'LIIAD'
+    'LIIAD',
+    'Tutorías',
+    'Gestión',
+    'Estadía técnica',
 ]
 
 export const modalidades = [
@@ -43,6 +41,8 @@ export const defaultActivity = {
         descripcion: "",
     },
     distribucion_actividades: "",
+    tipo_gestion: "",
+    tipo_estadia: "",
     nombre_actividades: "",
     grados_grupos: [],
     horas_semanales: 0,

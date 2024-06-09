@@ -24,7 +24,7 @@ export const NtInput = ({ academicWorkers }) => {
                 }
                 if (data.length > 0) {
                     setIdError(false)
-                    setStored({ record: { ...record, nt: data[0].ide, puesto: data[0].puesto, nombres: data[0].nombre } })
+                    setStored({ record: { ...record, nt: data[0].ide, puesto: data[0].puesto, nombre: data[0].nombre } })
                     setLocked(true)
                     return 'Número de trabajador encontrado'
                 } else {

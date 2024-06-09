@@ -1,12 +1,19 @@
-import {  } from "module";
 import { Server } from "socket.io";
 
-const iohandler = (req, res) => {
+const iohandler = (_, res) => {
     if(!res.socket.server.io) {
-        const io = new Server(res.socket.server)
+        const io = new Server(res.socket.server,{
+            cors: {
+                origin: '*',
+                methods: ['GET','POST']
+            },
+            allowEIO3: true,
+            transports: ['websocket','polling']
+        })
         io.on('connection', socket => {
+            socket.emit('connection',socket.id)
             socket.on('notify', notificationObject => {
-                socket.emit('notify', notificationObject)
+                io.emit('notify', notificationObject)
             })
         })
         res.socket.server.io = io
@@ -14,6 +21,12 @@ const iohandler = (req, res) => {
         console.log('Using existing socket')
     }
     res.end()
+}
+
+export const config = {
+    api: {
+        bodyParser: false
+    }
 }
 
 export default iohandler

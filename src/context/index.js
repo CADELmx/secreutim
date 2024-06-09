@@ -1,5 +1,6 @@
 import { defaultRecord } from '@/utils'
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { io } from 'socket.io-client'
 
 const Context = createContext()
 
@@ -8,8 +9,8 @@ export const StoredContext = () => useContext(Context)
 export const ContextProvider = ({ children }) => {
     const [memory, setMemory] = useState({
         record: defaultRecord,
-        socket: null,
         defaultGroups: [],
+        socket: io(),
         selectedItem: defaultRecord.actividades[0].id
     })
     const setStored = (prop) => setMemory((prev) => ({ ...prev, ...prop }))
@@ -24,6 +25,15 @@ export const ContextProvider = ({ children }) => {
         setStored,
         handleGlobalChange
     }
+    useEffect(() => {
+        const setupSocket = async () => {
+            await fetch('/api/socket')
+            return () => {
+                memory.socket.disconnect()
+            }
+        }
+        setupSocket()
+    }, [])
     return (
         <Context.Provider value={ctx}>
             {children}
