@@ -29,61 +29,136 @@ export const Activity = ({ act, eduPrograms }) => {
     return (
         <div className='flex flex-col gap-2'>
             <div className='flex flex-col md:flex-row gap-2'>
-                <Select className='md:w-3/5' label="Distribución de actividades" onChange={handleChange} name="distribucion_actividades" defaultSelectedKeys={checkEmptyStringOption(act?.distribucion_actividades)}>
+                <Select className={act.distribucion_actividades === "Tutorías" ? '' : 'md:w-3/5'} label="Distribución" onChange={handleChange} name="distribucion_actividades" defaultSelectedKeys={checkEmptyStringOption(act?.distribucion_actividades)}>
                     {
                         distribucionActividades.map((a) => {
                             return <SelectItem key={a} variant="flat">{a}</SelectItem>
                         })
                     }
                 </Select>
-                <Input label="Nombre de actividades" type="text" name="nombre_actividades" isRequired defaultValue={act.nombre_actividades} />
+                {
+                    (
+                        act.distribucion_actividades === "Gestión"
+                    ) && (
+                        <Select className='md:w-2/4' name='tipo_gestion' label='Tipo de gestión'>
+                            <SelectItem value={'INST'} variant="flat">Institucional</SelectItem>
+                            <SelectItem value={'ACAD'} variant="flat">Académica</SelectItem>
+                            <SelectItem value={'ASES'} variant='flat'>Asesoría
+                            </SelectItem>
+                        </Select>
+                    )
+                }
+                {
+                    !(
+                        act.distribucion_actividades === "Estadía técnica"
+                        || act.distribucion_actividades === "Tutorías"
+                    ) && (
+                        <Textarea minRows={1} size='sm' radius='md' label="Nombre de actividades" type="text" name="nombre_actividades" onChange={handleChange} isRequired defaultValue={act.nombre_actividades} />
+                    )
+                }
+                {
+                    (
+                        act.distribucion_actividades === "Estadía técnica"
+                    ) && (
+                        <Select className='' name='tipo_estadia' label='Tipo de estadía'>
+                            <SelectItem value='D'>TSU</SelectItem>
+                            <SelectItem value='D'>ING</SelectItem>
+                        </Select>
+                    )
+                }
             </div>
-            <div className="flex flex-col md:flex-row gap-2">
-                <Select className="md:w-2/5" label='Programa educativo' name='pe' defaultSelectedKeys={checkEmptyStringOption(act.pe?.siglas)} onSelectionChange={(e) => {
-                    setStored({
-                        record: {
-                            ...record, actividades: acts.map((a) => (a.id === selectedItem) ? {
-                                ...a, pe: e.size === 0 ? {
-                                    siglas: "",
-                                    descripcion: "",
-                                } : eduPrograms.find((p) => p.siglas == e.anchorKey)
-                            } : a)
-                        }
-                    })
-                }} value={act.pe?.siglas}>
-                    {
-                        eduPrograms.map((e, i) =>
-                            <SelectItem key={e.siglas} variant="flat">{e.siglas}</SelectItem>)
+            {
+                !(
+                    act.distribucion_actividades === "Estadía técnica"
+                    || act.distribucion_actividades === "Gestión"
+                    || act.distribucion_actividades === "LIIAD"
+                ) && (
+                    <div className="flex flex-col md:flex-row gap-2">
+                        <Select isDisabled={act.distribucion_actividades === ""} className="md:w-2/5" label='Programa educativo' name='pe' defaultSelectedKeys={checkEmptyStringOption(act.pe?.siglas)} onSelectionChange={(e) => {
+                            setStored({
+                                record: {
+                                    ...record, actividades: acts.map((a) => (a.id === selectedItem) ? {
+                                        ...a, pe: e.size === 0 ? {
+                                            siglas: "",
+                                            descripcion: "",
+                                        } : eduPrograms.find((p) => p.siglas == e.anchorKey)
+                                    } : a)
+                                }
+                            })
+                        }} value={act.pe?.siglas}>
+                            {
+                                eduPrograms.map((e, i) =>
+                                    <SelectItem key={e.siglas} variant="flat">{e.siglas}</SelectItem>)
+                            }
+                        </Select>
+                        <Textarea minRows={1} size="sm" radius="md" isReadOnly label='Detalles PE' isDisabled value={act.pe?.descripcion} />
+                    </div>
+                )
+            }
+            {
+                !(
+                    act.distribucion_actividades === "LIIAD"
+                    || act.distribucion_actividades === "Estadía técnica"
+                    || act.distribucion_actividades === "Gestión"
+                ) && (
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                        <Select isDisabled={act.pe.descripcion === ''} label="Grados y grupos" name="grados_grupos" selectionMode="multiple" description="Selección múltiple" defaultSelectedKeys={act.grados_grupos} onSelectionChange={(e) => {
+                            setStored({
+                                record: {
+                                    ...record, actividades: acts.map((a) => a.id === selectedItem ? {
+                                        ...a, grados_grupos: Array.from(e), subtotal_clasificacion: Array.from(e).length * act.horas_semanales
+                                    } : a)
+                                }
+                            })
+                        }}
+                        >
+                            {
+                                defaultGroups.map((grupo) => (
+                                    <SelectItem key={grupo} variant="flat">{grupo}</SelectItem>
+                                ))
+                            }
+                        </Select>
+                        <Input className="md:w-1/3" isReadOnly label='Nº de grupos' value={act.grados_grupos.length === 0 ? '' : act.grados_grupos.length} isDisabled />
+                    </div>
+                )
+            }
+            <div className='flex gap-2'>
+                {
+                    (act.distribucion_actividades === "Estadía técnica") && (
+                        <Input label="Número de estudiantes" type="number" name="numero_estudiantes" onChange={handleChange} min={1} />
+                    )
+                }
+                <Input label="Horas semanales" type="number" name="horas_semanales" min={1} defaultValue={act.horas_semanales} onChange={(e) => {
+                    if (act.distribucion_actividades === "Estadía técnica") {
+                        setStored({
+                            record: {
+                                ...record, actividades: acts.map(
+                                    (a) => a.id === selectedItem ? { ...a, [e.target.name]: e.target.value, subtotal_clasificacion: Number(e.target.value) * (a.numero_estudiantes || 1) } : a)
+                            }
+                        })
+                        return
                     }
-                </Select>
-                <Textarea minRows={1} size="sm" radius="md" isReadOnly label='Detalles PE' isDisabled value={act.pe?.descripcion} />
+                    if (
+                        act.distribucion_actividades === "Docencia"
+                        || act.distribucion_actividades === "Tutorías"
+                    ) {
+                        const subtotal_clasificacion = act.grados_grupos.length === 0 || e.target.value === '' ? '' : act.grados_grupos.length * Number(e.target.value)
+                        setStored({
+                            record: {
+                                ...record, actividades: acts.map(
+                                    (a) => a.id === selectedItem ? { ...a, [e.target.name]: e.target.value, subtotal_clasificacion } : a)
+                            }
+                        })
+                    } else {
+                        setStored({
+                            record: {
+                                ...record, actividades: acts.map(
+                                    (a) => a.id === selectedItem ? { ...a, [e.target.name]: e.target.value, subtotal_clasificacion: Number(e.target.value) } : a)
+                            }
+                        })
+                    }
+                }} />
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-                <Select label="Grados y grupos" name="grados_grupos" selectionMode="multiple" description="Selección múltiple" defaultSelectedKeys={act.grados_grupos} onSelectionChange={(e) => {
-                    setStored({
-                        record: { ...record, actividades: acts.map((a) => a.id === selectedItem ?{
-                            ...a, grados_grupos: Array.from(e), subtotal_clasificacion: Array.from(e).length * act.horas_semanales } : a) }
-                    })
-                }}
-                >
-                    {
-                        defaultGroups.map((grupo) => (
-                            <SelectItem key={grupo} variant="flat">{grupo}</SelectItem>
-                        ))
-                    }
-                </Select>
-                <Input className="md:w-1/3" isReadOnly label='Nº de grupos' value={act.grados_grupos.length === 0 ? '' : act.grados_grupos.length} isDisabled />
-            </div>
-            <Input label="Horas semanales" type="number" name="horas_semanales" min={1} defaultValue={act.horas_semanales} onChange={(e) => {
-                const subtotal_clasificacion = act.grados_grupos.length === 0 || e.target.value === '' ? '' : act.grados_grupos.length * Number(e.target.value)
-                setStored({
-                    record: {
-                        ...record, actividades: acts.map(
-                            (a) => a.id === act.id ? { ...a, [e.target.name]: e.target.value, subtotal_clasificacion } : a)
-                    }
-                })
-            }} />
-
             <Input label="Subtotal por clasificación" type="number" name="subtotal_clasificacion" value={act.subtotal_clasificacion === 0 ? '' : act.subtotal_clasificacion} isDisabled />
             {
                 acts.length > 1 && <Button color='danger' onClick={handleDelete}>
@@ -99,7 +174,7 @@ export const AddActivityButton = () => {
     const { actividades } = record
     const handleCreate = () => {
         if (actividades.length >= 10) {
-            return toast.error('No puedes agregar más carga academica',{
+            return toast.error('No puedes agregar más carga academica', {
                 id: 'max-activities'
             })
         }

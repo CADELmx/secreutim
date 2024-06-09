@@ -5,11 +5,10 @@ import { YearAndPeriodSelector } from "@/components/Selector";
 import { NtInput } from "@/components/WorkerNumber";
 import { StoredContext } from "@/context";
 import { puestos, supabase } from "@/utils";
-import socket from "@/utils/socket";
 import { Button, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
 
 export default function Index({ programasEducativos, academicWorkers }) {
-  const { memory: { record }, handleGlobalChange } = StoredContext()
+  const { memory: { record, socket }, handleGlobalChange } = StoredContext()
   const getPuesto = (puesto) => {
     if (puesto == "") return []
     if (!puestos.includes(puesto)) {
@@ -26,7 +25,7 @@ export default function Index({ programasEducativos, academicWorkers }) {
         <form className="flex flex-col gap-2">
           <NtInput academicWorkers={academicWorkers} />
           <div className="flex gap-2" >
-            <Textarea minRows={1} size="sm" radius="md" isRequired label="Nombre" type="text" name="nombre" onChange={handleGlobalChange} value={record?.nombres} />
+            <Textarea minRows={1} size="sm" radius="md" isRequired label="Nombre" type="text" name="nombre" onChange={handleGlobalChange} value={record?.nombre} />
             <Select className="w-40" label="Sexo" name="sexo" onChange={handleGlobalChange}>
               <SelectItem key={'H'} variant="flat">H</SelectItem>
               <SelectItem key={'M'} variant="flat">M</SelectItem>
@@ -46,7 +45,7 @@ export default function Index({ programasEducativos, academicWorkers }) {
               <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
             </svg>
           } className="w-full bg-utim" variant="solid" onPress={() => {
-            socket.emit('notify', 'Alguien envió cosas')
+            socket.emit('notify', record)
           }}>
             Guardar
           </Button>
@@ -65,7 +64,6 @@ export const getStaticProps = async () => {
   ]).in('area', [
     'P.E. de Tecnologías de la Información',
     'P.E. de Lengua Inglesa',
-    'P.E. de Lengua inglesa',
   ])
   const promiseResolver = async (promiseList) => {
     const results = await Promise.allSettled(promiseList)
