@@ -1,12 +1,13 @@
 import { ChangeEstatus } from "@/components/ChangeEstatus";
 import { StoredContext } from "@/context";
+import { supabase } from "@/utils";
 import { Chip, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 
-export default function Secretary() {
+export default function Secretary({plantillas}) {
   const { memory: { socket } } = StoredContext()
   const [conectedUsers, setConectedUsers] = useState([]);
-  const [notifications, setNotifications] = useState([]);
+  const [templates, setTemplates] = useState([]);
   useEffect(() => {
     const onConnect = () => {
       setConectedUsers([...conectedUsers, socket.id])
@@ -15,8 +16,7 @@ export default function Secretary() {
       setConectedUsers(conectedUsers.filter(user => user !== socket.id))
     }
     const onNotify = (notificationObject) => {
-      setNotifications((notifications) => ([...notifications, notificationObject]))
-      console.log(notifications)
+      setTemplates((notifications) => ([...notifications, notificationObject]))
     }
     socket.on('connection', onConnect)
     socket.on('disconnect', onDisconnect)
@@ -38,7 +38,7 @@ export default function Secretary() {
       </section>
       <section className="flex-col">
         {
-          notifications.length > 0 ? (
+          templates.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableColumn>Nombre</TableColumn>
@@ -48,14 +48,14 @@ export default function Secretary() {
               </TableHeader>
               <TableBody>
                 {
-                  notifications.map((notification, i) => {
+                  templates.map((template, _) => {
                     return (
-                      <TableRow key={i}>
-                        <TableCell>{notification.nombre}</TableCell>
-                        <TableCell>{notification.puesto}</TableCell>
-                        <TableCell>{notification.actividades.length}</TableCell>
+                      <TableRow key={template.id}>
+                        <TableCell>{template.nombre}</TableCell>
+                        <TableCell>{template.puesto}</TableCell>
+                        <TableCell>{template.actividades.length}</TableCell>
                         <TableCell className="p-0 m-0">
-                          <ChangeEstatus></ChangeEstatus>
+                          <ChangeEstatus status={template.status} templateid={template.id} />
                         </TableCell>
                       </TableRow>
                     )
@@ -63,11 +63,21 @@ export default function Secretary() {
                 }
               </TableBody>
             </Table>
-          ):(
+          ) : (
             <p className="text-center">Nada recibido aún</p>
           )
         }
       </section>
     </div>
   )
+}
+
+export const getStaticProps = async () => {
+  const { data, error } = await supabase.from('actividad').select('id,distribucion_actividades,programaseducativos (id),plantillas (id)')
+  console.log(data, error)
+  return {
+    props: {
+      plantillas: data,
+    }
+  }
 }

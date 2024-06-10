@@ -4,10 +4,13 @@ import { Select, SelectItem, SelectSection } from "@nextui-org/react"
 import { useEffect, useState } from "react"
 
 const YearSelector = ({ selectedYear, setState }) => {
-    const yearList = Array.from({ length: 3 }, (_, k) => `${selectedYear - k + 1}`)
+    const { memory: { record }, setStored } = StoredContext()
+    const year = new Date().getFullYear()
+    const yearList = Array.from({ length: 3 }, (_, k) => `${year - k + 1}`)
     return (
-        <Select label='Año' defaultSelectedKeys={[selectedYear]} className="md:w-2/5" onChange={e => {
+        <Select label='Año' disallowEmptySelection defaultSelectedKeys={[selectedYear]} className="md:w-2/5" onChange={e => {
             setState(e.target.value)
+            setStored({ record: { ...record, anio: e.target.value } })
         }}>
             {
                 yearList.map((year) => {
@@ -19,7 +22,7 @@ const YearSelector = ({ selectedYear, setState }) => {
 }
 
 const PeriodSelector = ({ selectedYear }) => {
-    const { setStored } = StoredContext()
+    const { setStored, memory: { record } } = StoredContext()
     const periods = [
         {
             periodo: "enero - abril",
@@ -44,16 +47,18 @@ const PeriodSelector = ({ selectedYear }) => {
         })
         const defaultGroups = option === "" ? [] :
             groups.grados.map(g => [`${g}A`, `${g}B`, `${g}C`]).flat()
-        setStored({ defaultGroups })
+        setStored({ defaultGroups, record: { ...record, periodo: option, anio: selectedYear } })
     }
     const actualMonth = new Date().toLocaleString('es-MX', { month: 'long' })
     const actualPeriod = periods.find(p => p.meses.includes(actualMonth))
     const defaultPeriod = `${actualPeriod.periodo} ${selectedYear}: Ordinario`
     useEffect(() => {
-        handleChange({ target: { value: defaultPeriod } })
+        if (!record.periodo) {
+            handleChange({ target: { value: defaultPeriod } })
+        }
     }, [])
     return (
-        <Select label='Periodo' autoCapitalize="words" onChange={handleChange} defaultSelectedKeys={[defaultPeriod]}>
+        <Select label='Periodo' autoCapitalize="words" onChange={handleChange} disallowEmptySelection defaultSelectedKeys={[defaultPeriod]}>
             <SelectSection title={'Ordinario'}>
                 {
                     generatePeriods(selectedYear, true).map(p => {

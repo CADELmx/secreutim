@@ -62,7 +62,7 @@ export const NtInput = ({ academicWorkers }) => {
                             </SelectSection>
                             <SelectSection title="Lengua Inglesa">
                                 {
-                                    academicWorkers.filter(w => w.area === 'P.E. de Lengua Inglesa' || w.area === 'P.E. de Lengua inglesa').map(w => {
+                                    academicWorkers.filter(w => w.area === 'P.E. de Lengua Inglesa').map(w => {
                                         return <SelectItem key={w.ide} variant="flat" endContent={<p className="text-utim">{w.ide}</p>}>{w.nombre}</SelectItem>
                                     })
                                 }

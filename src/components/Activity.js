@@ -1,7 +1,6 @@
 import { StoredContext } from '@/context'
 import { checkEmptyStringOption, defaultActivity, distribucionActividades } from '@/utils'
 import { Button, Input, Select, SelectItem, Textarea } from '@nextui-org/react'
-import { randomUUID } from 'crypto'
 import toast from 'react-hot-toast'
 
 export const Activity = ({ act, eduPrograms }) => {
@@ -16,6 +15,7 @@ export const Activity = ({ act, eduPrograms }) => {
                 ...record, actividades
             }
         })
+        console.log(act)
     }
     const handleDelete = () => {
         setStored({
@@ -23,6 +23,14 @@ export const Activity = ({ act, eduPrograms }) => {
             record: {
                 ...record,
                 actividades: acts.filter((a) => a.id !== act.id)
+            }
+        })
+    }
+    const updateTotal = () => {
+        setStored({
+            record: {
+                ...record,
+                total: record.actividades.map(e => e.subtotal_clasificacion).reduce((p, c) => p + c, 0)
             }
         })
     }
@@ -40,10 +48,18 @@ export const Activity = ({ act, eduPrograms }) => {
                     (
                         act.distribucion_actividades === "Gestión"
                     ) && (
-                        <Select className='md:w-2/4' name='tipo_gestion' label='Tipo de gestión'>
-                            <SelectItem value={'INST'} variant="flat">Institucional</SelectItem>
-                            <SelectItem value={'ACAD'} variant="flat">Académica</SelectItem>
-                            <SelectItem value={'ASES'} variant='flat'>Asesoría
+                        <Select className='md:w-2/4' name='tipo_gestion' label='Tipo de gestión' onSelectionChange={(e) => {
+                            setStored({
+                                record: {
+                                    ...record, actividades: acts.map((a) => (a.id === selectedItem) ? {
+                                        ...a, tipo_gestion: e.size === 0 ? '' : e.anchorKey
+                                    } : a)
+                                }
+                            })
+                        }}>
+                            <SelectItem key={'INST'} variant="flat">Institucional</SelectItem>
+                            <SelectItem key={'ACAD'} variant="flat">Académica</SelectItem>
+                            <SelectItem key={'ASES'} variant='flat'>Asesoría
                             </SelectItem>
                         </Select>
                     )
@@ -60,9 +76,18 @@ export const Activity = ({ act, eduPrograms }) => {
                     (
                         act.distribucion_actividades === "Estadía técnica"
                     ) && (
-                        <Select className='' name='tipo_estadia' label='Tipo de estadía'>
-                            <SelectItem value='D'>TSU</SelectItem>
-                            <SelectItem value='D'>ING</SelectItem>
+                        <Select className='' onSelectionChange={(e) => {
+                            setStored({
+                                record: {
+                                    ...record, actividades: acts.map((a) => (a.id === selectedItem) ? {
+                                        ...a, horas_semanales: e.anchorKey === 'TSU' ? 1 : 2, tipo_estadia: e.size === 0 ? '' : e.anchorKey
+                                    } : a)
+                                }
+                            })
+                            console.log(act)
+                        }} name='tipo_estadia' label='Tipo de estadía'>
+                            <SelectItem key='TSU'>TSU</SelectItem>
+                            <SelectItem key='ING'>ING</SelectItem>
                         </Select>
                     )
                 }
@@ -74,24 +99,21 @@ export const Activity = ({ act, eduPrograms }) => {
                     || act.distribucion_actividades === "LIIAD"
                 ) && (
                     <div className="flex flex-col md:flex-row gap-2">
-                        <Select isDisabled={act.distribucion_actividades === ""} className="md:w-2/5" label='Programa educativo' name='pe' defaultSelectedKeys={checkEmptyStringOption(act.pe?.siglas)} onSelectionChange={(e) => {
+                        <Select isDisabled={act.distribucion_actividades === ""} className="md:w-2/5" label='Programa educativo' name='pe' defaultSelectedKeys={[act.pe]} onSelectionChange={(e) => {
                             setStored({
                                 record: {
                                     ...record, actividades: acts.map((a) => (a.id === selectedItem) ? {
-                                        ...a, pe: e.size === 0 ? {
-                                            siglas: "",
-                                            descripcion: "",
-                                        } : eduPrograms.find((p) => p.siglas == e.anchorKey)
+                                        ...a, pe: e.size === 0 ? "" : e.anchorKey
                                     } : a)
                                 }
                             })
-                        }} value={act.pe?.siglas}>
+                        }} value={eduPrograms.find(e => e.id === act.pe)?.siglas}>
                             {
                                 eduPrograms.map((e, i) =>
-                                    <SelectItem key={e.siglas} variant="flat">{e.siglas}</SelectItem>)
+                                    <SelectItem key={e.id} variant="flat">{e.siglas}</SelectItem>)
                             }
                         </Select>
-                        <Textarea minRows={1} size="sm" radius="md" isReadOnly label='Detalles PE' isDisabled value={act.pe?.descripcion} />
+                        <Textarea minRows={1} size="sm" radius="md" isReadOnly label='Detalles PE' isDisabled value={eduPrograms.find(e => e.id == act.pe)?.descripcion} />
                     </div>
                 )
             }
@@ -125,7 +147,16 @@ export const Activity = ({ act, eduPrograms }) => {
             <div className='flex gap-2'>
                 {
                     (act.distribucion_actividades === "Estadía técnica") && (
-                        <Input label="Número de estudiantes" type="number" name="numero_estudiantes" onChange={handleChange} min={1} />
+                        <Input label="Número de estudiantes" type="number" defaultValue={act.numero_estudiantes} name="numero_estudiantes" onChange={(e)=>{
+                            setStored({
+                                record: {
+                                    ...record, actividades: acts.map(
+                                        (a) => a.id === selectedItem ? { ...a, [e.target.name]: Number(e.target.value), subtotal_clasificacion: Number(e.target.value) * (a.horas_semanales || 1) } : a)
+                                }
+                            })
+                            updateTotal()
+                            console.log(act)
+                        }} min={1} />
                     )
                 }
                 <Input label="Horas semanales" type="number" name="horas_semanales" min={1} defaultValue={act.horas_semanales} onChange={(e) => {
@@ -136,6 +167,8 @@ export const Activity = ({ act, eduPrograms }) => {
                                     (a) => a.id === selectedItem ? { ...a, [e.target.name]: e.target.value, subtotal_clasificacion: Number(e.target.value) * (a.numero_estudiantes || 1) } : a)
                             }
                         })
+                        updateTotal()
+                        console.log(act)
                         return
                     }
                     if (
@@ -149,6 +182,7 @@ export const Activity = ({ act, eduPrograms }) => {
                                     (a) => a.id === selectedItem ? { ...a, [e.target.name]: e.target.value, subtotal_clasificacion } : a)
                             }
                         })
+                        updateTotal()
                     } else {
                         setStored({
                             record: {
@@ -156,7 +190,9 @@ export const Activity = ({ act, eduPrograms }) => {
                                     (a) => a.id === selectedItem ? { ...a, [e.target.name]: e.target.value, subtotal_clasificacion: Number(e.target.value) } : a)
                             }
                         })
+                        updateTotal()
                     }
+                    console.log(act)
                 }} />
             </div>
             <Input label="Subtotal por clasificación" type="number" name="subtotal_clasificacion" value={act.subtotal_clasificacion === 0 ? '' : act.subtotal_clasificacion} isDisabled />
