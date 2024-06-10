@@ -1,5 +1,6 @@
 import { StoredContext } from "@/context"
 import { Chip, Navbar, NavbarBrand, NavbarContent } from "@nextui-org/react"
+import { on } from "events"
 import Image from "next/image"
 import { useRouter } from "next/router"
 import logo from "public/utim.png"
@@ -25,10 +26,19 @@ export const Layout = ({ children }) => {
             setIsConnected(false)
             setTrasport("N/A")
         }
-        function onNotify(data) {
+        function onTemplateSave(data) {
             if (router.pathname === "/secretary") {
                 toast.success('Plantilla docente recibida', {
-                    id: "notify"
+                    id: "notify",
+                    duration: 5000,
+                })
+            }
+        }
+        function onStatusUpdate(data) {
+            if (router.pathname === "/") {
+                toast.success(`Estado de la plantilla ${data.id} cambiado a ${data.status}`, {
+                    id: "status",
+                    duration: 5000,
                 })
             }
         }
@@ -37,7 +47,8 @@ export const Layout = ({ children }) => {
         }
         socket.on("connect", onConnect)
         socket.on("disconnect", onDisconnect)
-        socket.on("notify", onNotify)
+        socket.on("templateSave", onTemplateSave)
+        socket.on("updateStatus", onStatusUpdate)
         return () => {
             socket.off("connect", onConnect)
             socket.off("disconnect", onDisconnect)

@@ -1,23 +1,25 @@
-import { ChangeEstatus } from "@/components/ChangeStatus";
+import { ChangeStatus } from "@/components/ChangeStatus";
+import { ModalError } from "@/components/ModalError";
 import { StoredContext } from "@/context";
-import { promiseResolver, supabase } from "@/utils";
-import { Chip, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react";
+import { generateRecords } from "@/models/transactions";
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 
-export default function Secretary({ plantillas }) {
+export default function Secretary({ plantillas, error }) {
   const { memory: { socket } } = StoredContext()
   const [templates, setTemplates] = useState(plantillas || []);
   useEffect(() => {
-    const onNotify = (notificationObject) => {
-      setTemplates((notifications) => ([...notifications, notificationObject]))
+    const onTemplateSave = (templateObject) => {
+      setTemplates((templates) => ([...templates, templateObject]))
     }
-    socket.on('notify', onNotify)
+    socket.on('templateSave', onTemplateSave)
     return () => {
       socket.off('connection');
     };
   }, []);
   return (
     <div className="grid content-center justify-center">
+      <ModalError error={error} />
       <h1 className="text-2xl font-bold text-center text-utim tracking-widest capitalize p-2 m-2">Secretaría académica</h1>
       <p className="tracking-widest p-2 m-2">Formatos recibidos</p>
       <section className="flex-col">
@@ -38,7 +40,7 @@ export default function Secretary({ plantillas }) {
                       <TableCell aria-label="numero de actividades">{template.actividades.length}</TableCell>
                       <TableCell aria-label="total horas">{template.total}</TableCell>
                       <TableCell className="p-0 m-0" aria-label="estado">
-                        <ChangeEstatus status={template.status} templateid={template.id} />
+                        <ChangeStatus status={template.status} templateid={template.id} />
                       </TableCell>
                     </TableRow>
                   )
@@ -55,29 +57,11 @@ export default function Secretary({ plantillas }) {
 }
 
 export const getStaticProps = async () => {
-  const plantillaPromise = supabase.from('plantilla').select('*')
-  const actividadesPromise = supabase.from('actividad').select('*')
-  const [plantillaRes, actividadesRes] = await promiseResolver([plantillaPromise, actividadesPromise])
-  const { data: plantillas, error: plantillasError } = plantillaRes
-  const { data: actividades, error: actividadesError } = actividadesRes
-  if (plantillasError || actividadesError) {
-    console.log(plantillasError, actividadesError)
-    return {
-      props: {
-        error: { message: 'Error al obtener las plantillas' }
-      }
-    }
-  }
-  const data = plantillas.map(plantilla => {
-    const actividadesPlantilla = actividades.filter(actividad => actividad.plantilla_id === plantilla.id)
-    return {
-      ...plantilla,
-      actividades: actividadesPlantilla
-    }
-  })
+  const { props } = await generateRecords()
   return {
+    revalidate: 10,
     props: {
-      plantillas: data,
+      ...props
     }
   }
 }

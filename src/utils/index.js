@@ -6,6 +6,8 @@ export const promiseResolver = async (promiseList) => {
     return data
 }
 
+export const singlePromiseResolver = async (promise) =>  await promise
+
 export const puestos = [
     'Profesor de Tiempo Completo Titular "A"',
     'Profesor de Tiempo Completo Titular "B"',
@@ -90,6 +92,23 @@ export const generatePeriods = (year, ordinario) => {
 }
 
 export const checkEmptyStringOption = (string) => string === "" ? [] : [string]
+
+export const sumHoras = (activities) => {
+    if (activities?.length){
+        return activities.map(e => e.subtotal_clasificacion).reduce((p, c) => p + c, 0)
+    }
+    return 0
+}
+
+export const generateTemplateObject = (record) => {
+    const plantilla = Object.fromEntries(Object.entries(record).filter(([k, v]) => {
+        if (k != 'actividades') {
+            return true
+        }
+    })
+    )
+    return plantilla
+}
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
