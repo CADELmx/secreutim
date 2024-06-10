@@ -42,7 +42,7 @@ export const modalidades = [
 ]
 export const defaultActivity = {
     id: crypto.randomUUID(),
-    pe: "",
+    pe: null,
     distribucion_actividades: "",
     tipo_gestion: "",
     tipo_estadia: "",

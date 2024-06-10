@@ -1,6 +1,6 @@
 import { StoredContext } from "@/context"
 import { supabase } from "@/utils"
-import { Button, Chip, Input, Select, SelectItem, SelectSection, Switch } from "@nextui-org/react"
+import { Chip, Input, Select, SelectItem, SelectSection, Switch } from "@nextui-org/react"
 import { useState } from "react"
 import toast from "react-hot-toast"
 

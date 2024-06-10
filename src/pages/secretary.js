@@ -1,25 +1,16 @@
-import { ChangeEstatus } from "@/components/ChangeEstatus";
+import { ChangeEstatus } from "@/components/ChangeStatus";
 import { StoredContext } from "@/context";
-import { supabase } from "@/utils";
+import { promiseResolver, supabase } from "@/utils";
 import { Chip, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 
-export default function Secretary({plantillas}) {
+export default function Secretary({ plantillas }) {
   const { memory: { socket } } = StoredContext()
-  const [conectedUsers, setConectedUsers] = useState([]);
-  const [templates, setTemplates] = useState([]);
+  const [templates, setTemplates] = useState(plantillas || []);
   useEffect(() => {
-    const onConnect = () => {
-      setConectedUsers([...conectedUsers, socket.id])
-    }
-    const onDisconnect = () => {
-      setConectedUsers(conectedUsers.filter(user => user !== socket.id))
-    }
     const onNotify = (notificationObject) => {
       setTemplates((notifications) => ([...notifications, notificationObject]))
     }
-    socket.on('connection', onConnect)
-    socket.on('disconnect', onDisconnect)
     socket.on('notify', onNotify)
     return () => {
       socket.off('connection');
@@ -31,35 +22,26 @@ export default function Secretary({plantillas}) {
       <p className="tracking-widest p-2 m-2">Formatos recibidos</p>
       <section className="flex-col">
         {
-          conectedUsers.map((user, i) => (
-            <Chip key={i} color="success" variant="dot">{user}</Chip>
-          ))
-        }
-      </section>
-      <section className="flex-col">
-        {
           templates.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableColumn>Nombre</TableColumn>
-                <TableColumn>Puesto</TableColumn>
-                <TableColumn>Actividades</TableColumn>
-                <TableColumn>Estado</TableColumn>
+            <Table isCompact aria-label="tabla de plantillas">
+              <TableHeader aria-label="cabecera de la tabla">
+                <TableColumn aria-label="columna nombre">Nombre</TableColumn>
+                <TableColumn aria-label="columna actividades">Actividades</TableColumn>
+                <TableColumn aria-label="columna horas">Horas</TableColumn>
+                <TableColumn aria-label="columna estado">Estado</TableColumn>
               </TableHeader>
-              <TableBody>
+              <TableBody aria-label="cuerpo de la tabla" items={templates} emptyContent={<h1 className="tracking-widest p-2 m-2">Nada recibido aún</h1>}>
                 {
-                  templates.map((template, _) => {
-                    return (
-                      <TableRow key={template.id}>
-                        <TableCell>{template.nombre}</TableCell>
-                        <TableCell>{template.puesto}</TableCell>
-                        <TableCell>{template.actividades.length}</TableCell>
-                        <TableCell className="p-0 m-0">
-                          <ChangeEstatus status={template.status} templateid={template.id} />
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })
+                  (template) => (
+                    <TableRow key={template.id}>
+                      <TableCell aria-label="nombre">{template.nombre}</TableCell>
+                      <TableCell aria-label="numero de actividades">{template.actividades.length}</TableCell>
+                      <TableCell aria-label="total horas">{template.total}</TableCell>
+                      <TableCell className="p-0 m-0" aria-label="estado">
+                        <ChangeEstatus status={template.status} templateid={template.id} />
+                      </TableCell>
+                    </TableRow>
+                  )
                 }
               </TableBody>
             </Table>
@@ -73,8 +55,26 @@ export default function Secretary({plantillas}) {
 }
 
 export const getStaticProps = async () => {
-  const { data, error } = await supabase.from('actividad').select('id,distribucion_actividades,programaseducativos (id),plantillas (id)')
-  console.log(data, error)
+  const plantillaPromise = supabase.from('plantilla').select('*')
+  const actividadesPromise = supabase.from('actividad').select('*')
+  const [plantillaRes, actividadesRes] = await promiseResolver([plantillaPromise, actividadesPromise])
+  const { data: plantillas, error: plantillasError } = plantillaRes
+  const { data: actividades, error: actividadesError } = actividadesRes
+  if (plantillasError || actividadesError) {
+    console.log(plantillasError, actividadesError)
+    return {
+      props: {
+        error: { message: 'Error al obtener las plantillas' }
+      }
+    }
+  }
+  const data = plantillas.map(plantilla => {
+    const actividadesPlantilla = actividades.filter(actividad => actividad.plantilla_id === plantilla.id)
+    return {
+      ...plantilla,
+      actividades: actividadesPlantilla
+    }
+  })
   return {
     props: {
       plantillas: data,

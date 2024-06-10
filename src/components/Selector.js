@@ -1,6 +1,6 @@
 import { StoredContext } from "@/context"
-import { generatePeriods } from "@/utils"
-import { Select, SelectItem, SelectSection } from "@nextui-org/react"
+import { checkEmptyStringOption, distribucionActividades, generatePeriods } from "@/utils"
+import { Input, Select, SelectItem, SelectSection, Textarea } from "@nextui-org/react"
 import { useEffect, useState } from "react"
 
 const YearSelector = ({ selectedYear, setState }) => {
@@ -84,6 +84,68 @@ export const YearAndPeriodSelector = () => {
         <div className="flex flex-col sm:flex-row gap-2">
             <YearSelector setState={setSelectedYear} selectedYear={selectedYear} />
             <PeriodSelector selectedYear={selectedYear} />
+        </div>
+    )
+}
+
+export const ActTypeSelector = ({ act, handler }) => {
+    return (
+        <Select className={act?.distribucion_actividades === "Tutorías" ? '' : 'md:w-3/5'} label="Distribución" onChange={handler} name="distribucion_actividades" defaultSelectedKeys={checkEmptyStringOption(act?.distribucion_actividades)}>
+            {
+                distribucionActividades.map((a) => {
+                    return <SelectItem key={a} variant="flat">{a}</SelectItem>
+                })
+            }
+        </Select>
+    )
+}
+
+export const ManagementTypeSelector = ({ act, handler }) => {
+    return (
+        <Select className='md:w-2/4' name='tipo_gestion' label='Tipo de gestión' onSelectionChange={handler} defaultSelectedKeys={[act?.tipo_gestión]}>
+            <SelectItem key={'INST'} variant="flat">Institucional</SelectItem>
+            <SelectItem key={'ACAD'} variant="flat">Académica</SelectItem>
+            <SelectItem key={'ASES'} variant='flat'>Asesoría</SelectItem>
+        </Select>
+    )
+}
+
+export const StayTypeSelector = ({ act, handler }) => {
+    return (
+        <Select className='' onSelectionChange={handler} name='tipo_estadia' label='Tipo de estadía' defaultSelectedKeys={checkEmptyStringOption(act.tipo_estadia)}>
+            <SelectItem key='TSU'>TSU</SelectItem>
+            <SelectItem key='ING'>ING</SelectItem>
+        </Select>
+    )
+}
+
+export const GroupSelector = ({ act, handler }) => {
+    const { memory: { defaultGroups } } = StoredContext()
+    return (
+        <div className="flex flex-col gap-2 sm:flex-row">
+            <Select isDisabled={act.pe.descripcion === ''} label="Grados y grupos" name="grados_grupos" selectionMode="multiple" description="Selección múltiple" defaultSelectedKeys={act.grados_grupos} onSelectionChange={handler}
+            >
+                {
+                    defaultGroups.map((grupo) => (
+                        <SelectItem key={grupo} variant="flat">{grupo}</SelectItem>
+                    ))
+                }
+            </Select>
+            <Input className="md:w-1/3" isReadOnly label='Nº de grupos' value={act.grados_grupos.length === 0 ? '' : act.grados_grupos.length} isDisabled />
+        </div>
+    )
+}
+
+export const AcademicProgramSelector = ({ act, eduPrograms, handler }) => {
+    return (
+        <div className="flex flex-col md:flex-row gap-2">
+            <Select isDisabled={act?.distribucion_actividades === ""} className="md:w-2/5" label='Programa educativo' name='pe' defaultSelectedKeys={[act.pe]} onSelectionChange={handler} value={eduPrograms.find(e => e.id === act.pe)?.siglas}>
+                {
+                    eduPrograms.map((e) =>
+                        <SelectItem key={e.id} variant="flat">{e.siglas}</SelectItem>)
+                }
+            </Select>
+            <Textarea minRows={1} size="sm" radius="md" isReadOnly label='Detalles PE' isDisabled value={eduPrograms.find(e => e.id == act.pe)?.descripcion} />
         </div>
     )
 }
