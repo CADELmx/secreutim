@@ -26,11 +26,10 @@ export default function Index({ programasEducativos, academicWorkers }) {
       }
     })
     )
-    console.log(plantilla)
-    const templatePromise = supabase.from('plantillas').insert([plantilla]).select('id')
+    const templatePromise = supabase.from('plantilla').insert([plantilla]).select('id')
     toast.promise(templatePromise, {
       loading: 'Guardando...',
-      success: ({ data, error }) => {
+      success: async ({ data, error }) => {
         if (error) {
           return 'Error al guardar plantilla'
         }
@@ -41,7 +40,8 @@ export default function Index({ programasEducativos, academicWorkers }) {
           }
         })
         console.log(actividades)
-        const { data: _, error: actError } = supabase.from('actividad').insert(actividades).select('id')
+        const { data: actData, error: actError } = await supabase.from('actividad').insert(actividades).select('id')
+        console.log(actData, actError)
         socket.emit('notify', {
           id: data[0].id,
           ...record,

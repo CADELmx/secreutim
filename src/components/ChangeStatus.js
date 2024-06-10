@@ -7,7 +7,7 @@ export const ChangeEstatus = ({ status, templateid }) => {
     const statusTypes = [{ name: 'Pendiente', color: 'warning' }, { name: 'Aprobado', color: 'success' }, { name: 'Corrección', color: 'danger' }];
     const [taskStatus, setTaskStatus] = useState(statusTypes.find(s => s.name === status) || statusTypes[0])
     const handleTaskStatus = (status) => {
-        toast.promise(supabase.from('plantillas').update({ status: status.name }).eq('id', templateid), {
+        toast.promise(supabase.from('plantilla').update({ status: status.name }).eq('id', templateid), {
             loading: 'Cambiando estado...',
             success: ({ data, error }) => {
                 if (error) {
@@ -24,7 +24,7 @@ export const ChangeEstatus = ({ status, templateid }) => {
     return (
         <Dropdown className="grid min-w-[10]">
             <DropdownTrigger>
-                <Chip color={taskStatus.color} className='min-w-full' variant="dot">{taskStatus.name}</Chip>
+                <Chip color={taskStatus.color} className='min-w-full hover:cursor-pointer' variant="dot">{taskStatus.name}</Chip>
             </DropdownTrigger>
             <DropdownMenu aria-label={'dropdown menu for status'} variant="solid" className="p-0 m-0 w-full" classNames={{ base: 'p-0 m-0 w-full', list: 'p-0 m-0 w-full' }}>
                 {
