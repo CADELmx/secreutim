@@ -1,6 +1,7 @@
 import { StoredContext } from "@/context"
 import { Chip, Navbar, NavbarBrand, NavbarContent } from "@nextui-org/react"
 import Image from "next/image"
+import { useRouter } from "next/router"
 import logo from "public/utim.png"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
@@ -9,6 +10,7 @@ export const Layout = ({ children }) => {
     const { memory: { socket } } = StoredContext()
     const [isConnected, setIsConnected] = useState(false);
     const [trasport, setTrasport] = useState("N/A");
+    const router = useRouter()
     useEffect(() => {
         function onConnect() {
             setIsConnected(true)
@@ -24,9 +26,11 @@ export const Layout = ({ children }) => {
             setTrasport("N/A")
         }
         function onNotify(data) {
-            toast.success('Enviado', {
-                id: "notify"
-            })
+            if (router.pathname === "/secretary") {
+                toast.success('Plantilla docente recibida', {
+                    id: "notify"
+                })
+            }
         }
         if (socket.connected) {
             onConnect()

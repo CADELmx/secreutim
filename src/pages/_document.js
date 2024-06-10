@@ -4,7 +4,7 @@ export default function Document() {
   return (
     <Html lang="es-MX">
       <Head />
-      <body className='bg-background text-foreground min-h-screen relative'>
+      <body className='bg-background text-foreground min-h-screen relative overflow-y-auto'>
         <Main />
         <NextScript />
         <footer className="flex self-center items-center justify-center h-30 static pt-5 mt-5 w-full bottom-0">

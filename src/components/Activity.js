@@ -1,11 +1,12 @@
 import { StoredContext } from '@/context'
-import { checkEmptyStringOption, defaultActivity, distribucionActividades } from '@/utils'
-import { Button, Input, Select, SelectItem, Textarea } from '@nextui-org/react'
-import { randomUUID } from 'crypto'
+import { defaultActivity } from '@/utils'
+import { Button, Input, Textarea } from '@nextui-org/react'
 import toast from 'react-hot-toast'
+import { AcademicProgramSelector, ActTypeSelector, GroupSelector, ManagementTypeSelector, StayTypeSelector } from './Selector'
+import { useEffect } from 'react'
 
 export const Activity = ({ act, eduPrograms }) => {
-    const { memory: { record, defaultGroups, selectedItem }, setStored } = StoredContext()
+    const { memory: { record, selectedItem }, setStored } = StoredContext()
     const { actividades: acts } = record
     const handleChange = (e) => {
         const actividades = acts.map((a) => {
@@ -13,7 +14,8 @@ export const Activity = ({ act, eduPrograms }) => {
         })
         setStored({
             record: {
-                ...record, actividades
+                ...record,
+                actividades
             }
         })
     }
@@ -26,26 +28,105 @@ export const Activity = ({ act, eduPrograms }) => {
             }
         })
     }
+    const changeManagementType = (e) => {
+        setStored({
+            record: {
+                ...record, actividades: acts.map((a) => (a.id === selectedItem) ? {
+                    ...a, tipo_gestion: e.size === 0 ? '' : e.anchorKey
+                } : a)
+            }
+        })
+    }
+    const changeStayType = (e) => {
+        const horas_semanales = e.anchorKey === 'TSU' ? 1 : 2
+        setStored({
+            record: {
+                ...record, actividades: acts.map((a) => (a.id === selectedItem) ? {
+                    ...a, horas_semanales, subtotal_clasificacion: horas_semanales * act.numero_estudiantes, tipo_estadia: e.size === 0 ? '' : e.anchorKey
+                } : a)
+            }
+        })
+    }
+    const changeGroup = (e) => {
+        setStored({
+            record: {
+                ...record, actividades: acts.map((a) => a.id === selectedItem ? {
+                    ...a, grados_grupos: Array.from(e), subtotal_clasificacion: Array.from(e).length * act.horas_semanales
+                } : a)
+            }
+        })
+    }
+    const changeWeekleyHours = (e) => {
+        if (act.distribucion_actividades === "Estadía técnica") {
+            setStored({
+                record: {
+                    ...record, actividades: acts.map(
+                        (a) => a.id === selectedItem ? { ...a, [e.target.name]: Number(e.target.value), subtotal_clasificacion: Number(e.target.value) * (act.numero_estudiantes || 1) } : a)
+                }
+            })
+            return
+        }
+        if (
+            act.distribucion_actividades === "Docencia"
+            || act.distribucion_actividades === "Tutorías"
+        ) {
+            const subtotal_clasificacion = act.grados_grupos.length === 0 || e.target.value === '' ? '' : act.grados_grupos.length * Number(e.target.value)
+            setStored({
+                record: {
+                    ...record, actividades: acts.map(
+                        (a) => a.id === selectedItem ? { ...a, [e.target.name]: Number(e.target.value), subtotal_clasificacion } : a)
+                }
+            })
+        } else {
+            setStored({
+                record: {
+                    ...record, actividades: acts.map(
+                        (a) => a.id === selectedItem ? { ...a, [e.target.name]: Number(e.target.value), subtotal_clasificacion: Number(e.target.value) } : a)
+                }
+            })
+        }
+    }
+    const changeActivityProgram = (e) => {
+        setStored({
+            record: {
+                ...record, actividades: acts.map((a) => (a.id === selectedItem) ? {
+                    ...a, pe: e.size === 0 ? "" : e.anchorKey
+                } : a)
+            }
+        })
+    }
+    const changeStudentsNumber = (e) => {
+        setStored({
+            record: {
+                ...record, actividades: acts.map(
+                    (a) => a.id === selectedItem ? { ...a, [e.target.name]: Number(e.target.value), subtotal_clasificacion: Number(e.target.value) * (act.horas_semanales || 1) } : a)
+            }
+        })
+    }
+    const updateTotal = () => {
+        const total = record.actividades
+            .map(e => e.subtotal_clasificacion)
+            .reduce((p, c) => p + c, 0)
+        setStored({
+            record: {
+                ...record,
+                total
+            }
+        })
+    }
+    useEffect(() => {
+        updateTotal()
+    }, [act.subtotal_clasificacion])
+
     return (
         <div className='flex flex-col gap-2'>
             <div className='flex flex-col md:flex-row gap-2'>
-                <Select className={act.distribucion_actividades === "Tutorías" ? '' : 'md:w-3/5'} label="Distribución" onChange={handleChange} name="distribucion_actividades" defaultSelectedKeys={checkEmptyStringOption(act?.distribucion_actividades)}>
-                    {
-                        distribucionActividades.map((a) => {
-                            return <SelectItem key={a} variant="flat">{a}</SelectItem>
-                        })
-                    }
-                </Select>
+                <ActTypeSelector act={act} handler={handleChange} />
                 {
                     (
                         act.distribucion_actividades === "Gestión"
                     ) && (
-                        <Select className='md:w-2/4' name='tipo_gestion' label='Tipo de gestión'>
-                            <SelectItem value={'INST'} variant="flat">Institucional</SelectItem>
-                            <SelectItem value={'ACAD'} variant="flat">Académica</SelectItem>
-                            <SelectItem value={'ASES'} variant='flat'>Asesoría
-                            </SelectItem>
-                        </Select>
+                        <ManagementTypeSelector act={act} handler={changeManagementType} />
                     )
                 }
                 {
@@ -60,10 +141,7 @@ export const Activity = ({ act, eduPrograms }) => {
                     (
                         act.distribucion_actividades === "Estadía técnica"
                     ) && (
-                        <Select className='' name='tipo_estadia' label='Tipo de estadía'>
-                            <SelectItem value='D'>TSU</SelectItem>
-                            <SelectItem value='D'>ING</SelectItem>
-                        </Select>
+                        <StayTypeSelector act={act} handler={changeStayType} />
                     )
                 }
             </div>
@@ -73,26 +151,7 @@ export const Activity = ({ act, eduPrograms }) => {
                     || act.distribucion_actividades === "Gestión"
                     || act.distribucion_actividades === "LIIAD"
                 ) && (
-                    <div className="flex flex-col md:flex-row gap-2">
-                        <Select isDisabled={act.distribucion_actividades === ""} className="md:w-2/5" label='Programa educativo' name='pe' defaultSelectedKeys={checkEmptyStringOption(act.pe?.siglas)} onSelectionChange={(e) => {
-                            setStored({
-                                record: {
-                                    ...record, actividades: acts.map((a) => (a.id === selectedItem) ? {
-                                        ...a, pe: e.size === 0 ? {
-                                            siglas: "",
-                                            descripcion: "",
-                                        } : eduPrograms.find((p) => p.siglas == e.anchorKey)
-                                    } : a)
-                                }
-                            })
-                        }} value={act.pe?.siglas}>
-                            {
-                                eduPrograms.map((e, i) =>
-                                    <SelectItem key={e.siglas} variant="flat">{e.siglas}</SelectItem>)
-                            }
-                        </Select>
-                        <Textarea minRows={1} size="sm" radius="md" isReadOnly label='Detalles PE' isDisabled value={act.pe?.descripcion} />
-                    </div>
+                    <AcademicProgramSelector act={act} eduPrograms={eduPrograms} handler={changeActivityProgram} />
                 )
             }
             {
@@ -101,65 +160,18 @@ export const Activity = ({ act, eduPrograms }) => {
                     || act.distribucion_actividades === "Estadía técnica"
                     || act.distribucion_actividades === "Gestión"
                 ) && (
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                        <Select isDisabled={act.pe.descripcion === ''} label="Grados y grupos" name="grados_grupos" selectionMode="multiple" description="Selección múltiple" defaultSelectedKeys={act.grados_grupos} onSelectionChange={(e) => {
-                            setStored({
-                                record: {
-                                    ...record, actividades: acts.map((a) => a.id === selectedItem ? {
-                                        ...a, grados_grupos: Array.from(e), subtotal_clasificacion: Array.from(e).length * act.horas_semanales
-                                    } : a)
-                                }
-                            })
-                        }}
-                        >
-                            {
-                                defaultGroups.map((grupo) => (
-                                    <SelectItem key={grupo} variant="flat">{grupo}</SelectItem>
-                                ))
-                            }
-                        </Select>
-                        <Input className="md:w-1/3" isReadOnly label='Nº de grupos' value={act.grados_grupos.length === 0 ? '' : act.grados_grupos.length} isDisabled />
-                    </div>
+                    <GroupSelector act={act} handler={changeGroup} />
                 )
             }
             <div className='flex gap-2'>
                 {
                     (act.distribucion_actividades === "Estadía técnica") && (
-                        <Input label="Número de estudiantes" type="number" name="numero_estudiantes" onChange={handleChange} min={1} />
+                        <Input label="Número de estudiantes" type="number" defaultValue={act.numero_estudiantes} name="numero_estudiantes" onChange={changeStudentsNumber} min={1} />
                     )
                 }
-                <Input label="Horas semanales" type="number" name="horas_semanales" min={1} defaultValue={act.horas_semanales} onChange={(e) => {
-                    if (act.distribucion_actividades === "Estadía técnica") {
-                        setStored({
-                            record: {
-                                ...record, actividades: acts.map(
-                                    (a) => a.id === selectedItem ? { ...a, [e.target.name]: e.target.value, subtotal_clasificacion: Number(e.target.value) * (a.numero_estudiantes || 1) } : a)
-                            }
-                        })
-                        return
-                    }
-                    if (
-                        act.distribucion_actividades === "Docencia"
-                        || act.distribucion_actividades === "Tutorías"
-                    ) {
-                        const subtotal_clasificacion = act.grados_grupos.length === 0 || e.target.value === '' ? '' : act.grados_grupos.length * Number(e.target.value)
-                        setStored({
-                            record: {
-                                ...record, actividades: acts.map(
-                                    (a) => a.id === selectedItem ? { ...a, [e.target.name]: e.target.value, subtotal_clasificacion } : a)
-                            }
-                        })
-                    } else {
-                        setStored({
-                            record: {
-                                ...record, actividades: acts.map(
-                                    (a) => a.id === selectedItem ? { ...a, [e.target.name]: e.target.value, subtotal_clasificacion: Number(e.target.value) } : a)
-                            }
-                        })
-                    }
-                }} />
+                <Input label="Horas semanales" type="number" name="horas_semanales" min={1} value={act?.horas_semanales === 0 ? '' : act?.horas_semanales} onChange={changeWeekleyHours} />
             </div>
-            <Input label="Subtotal por clasificación" type="number" name="subtotal_clasificacion" value={act.subtotal_clasificacion === 0 ? '' : act.subtotal_clasificacion} isDisabled />
+            <Input label="Subtotal por clasificación" type="number" name="subtotal_clasificacion" value={act?.subtotal_clasificacion === 0 ? '' : act?.subtotal_clasificacion} isDisabled />
             {
                 acts.length > 1 && <Button color='danger' onClick={handleDelete}>
                     Eliminar actividad
