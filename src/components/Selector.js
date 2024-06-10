@@ -123,7 +123,7 @@ export const GroupSelector = ({ act, handler }) => {
     const { memory: { defaultGroups } } = StoredContext()
     return (
         <div className="flex flex-col gap-2 sm:flex-row">
-            <Select isDisabled={act.pe.descripcion === ''} label="Grados y grupos" name="grados_grupos" selectionMode="multiple" description="Selección múltiple" defaultSelectedKeys={act.grados_grupos} onSelectionChange={handler}
+            <Select isDisabled={!act.pe} label="Grados y grupos" name="grados_grupos" selectionMode="multiple" description="Selección múltiple" defaultSelectedKeys={act.grados_grupos} onSelectionChange={handler}
             >
                 {
                     defaultGroups.map((grupo) => (
@@ -139,7 +139,7 @@ export const GroupSelector = ({ act, handler }) => {
 export const AcademicProgramSelector = ({ act, eduPrograms, handler }) => {
     return (
         <div className="flex flex-col md:flex-row gap-2">
-            <Select isDisabled={act?.distribucion_actividades === ""} className="md:w-2/5" label='Programa educativo' name='pe' defaultSelectedKeys={[act.pe]} onSelectionChange={handler} value={eduPrograms.find(e => e.id === act.pe)?.siglas}>
+            <Select isDisabled={act?.distribucion_actividades === ""} className="md:w-2/5" label='Programa educativo' name='pe' defaultSelectedKeys={act.pe ? [act.pe] : []} onSelectionChange={handler} >
                 {
                     eduPrograms.map((e) =>
                         <SelectItem key={e.id} variant="flat">{e.siglas}</SelectItem>)
