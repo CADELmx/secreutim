@@ -3,7 +3,7 @@ import { Html, Head, Main, NextScript } from 'next/document'
 export default function Document() {
   return (
     <Html lang="es-MX">
-      <Head />
+      <Head title='Gestión de plantillas docentes'/>
       <body className='bg-background text-foreground min-h-screen relative overflow-y-auto'>
         <Main />
         <NextScript />

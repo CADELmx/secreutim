@@ -12,8 +12,11 @@ const iohandler = (_, res) => {
         })
         io.on('connection', socket => {
             socket.emit('connection',socket.id)
-            socket.on('notify', notificationObject => {
-                io.emit('notify', notificationObject)
+            socket.on('templateSend', templateObject => {
+                io.emit('templateSave', templateObject)
+            })
+            socket.on('updateStatus', statusObject => {
+                io.emit('updateStatus', statusObject)
             })
         })
         res.socket.server.io = io

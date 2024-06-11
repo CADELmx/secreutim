@@ -1,5 +1,5 @@
 import { StoredContext } from "@/context"
-import { supabase } from "@/utils"
+import { getOneAcademicWorker } from "@/models/transactions"
 import { Chip, Input, Select, SelectItem, SelectSection, Switch } from "@nextui-org/react"
 import { useState } from "react"
 import toast from "react-hot-toast"
@@ -10,11 +10,7 @@ export const NtInput = ({ academicWorkers }) => {
     const [locked, setLocked] = useState(false)
     const [selectorActive, setSelectorActive] = useState(false)
     const handleChangeFromSupabase = async (newValue) => {
-        const supaPromise = supabase.from('dpersonales').select('ide,nombre,puesto,area').eq('ide', newValue).ilikeAnyOf('puesto', [
-            '%asignatura%',
-            '%Tiempo Completo%',
-            '%de Apoyo%',
-        ])
+        const supaPromise = getOneAcademicWorker(newValue)
         if (newValue === '') return
         toast.promise(supaPromise, {
             loading: 'Buscando número de trabajador',
