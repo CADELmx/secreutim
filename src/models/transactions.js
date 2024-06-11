@@ -1,5 +1,4 @@
 import { promiseResolver, supabase } from "@/utils"
-import { get } from "http"
 
 export const insertActivities = async (activities) => {
     const response = await supabase.from('actividad').insert(activities).select('id')
@@ -53,6 +52,14 @@ export const getActivitiesByTemplate = (id) => {
     return supabase.from('actividad').select('*').eq('plantilla_id', id)
 }
 
+export const setTemplateStatus = (id, status) => {
+    return supabase.from('plantilla').update({ status }).eq('id', id).select('id')
+}
+
+export const insertComment = (template_id, comment) => {
+    return supabase.from('comentarios').insert({ plantilla_id: template_id, comentario: comment }).select('id')
+}
+
 export const generateRecords = async () => {
     const plantillaPromise = getTemplates()
     const actividadesPromise = getActivites()
@@ -88,10 +95,10 @@ export const generateSingleRecord = async (id) => {
     const { data: plantillas, error: plantillasError } = plantillaRes
     const { data: actividades, error: actividadesError } = actividadesRes
     if (plantillasError || actividadesError) {
-        console.error('#ERROR# Error al obtener datos de plantillas')
+        console.error('#ERROR# Error al obtener datos de plantilla')
         return {
             props: {
-                error: 'Error al obtener las plantillas'
+                error: 'Error al obtener la plantilla'
             }
         }
     }

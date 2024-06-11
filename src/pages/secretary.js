@@ -25,7 +25,7 @@ export default function Secretary({ plantillas, error }) {
       <section className="flex-col">
         {
           templates.length > 0 ? (
-            <Table isCompact aria-label="tabla de plantillas">
+            <Table aria-label="tabla de plantillas">
               <TableHeader aria-label="cabecera de la tabla">
                 <TableColumn aria-label="columna nombre">Nombre</TableColumn>
                 <TableColumn aria-label="columna actividades">Actividades</TableColumn>
@@ -59,7 +59,7 @@ export default function Secretary({ plantillas, error }) {
 export const getStaticProps = async () => {
   const { props } = await generateRecords()
   return {
-    revalidate: 10,
+    revalidate: 1,
     props: {
       ...props
     }

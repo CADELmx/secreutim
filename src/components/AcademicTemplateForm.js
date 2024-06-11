@@ -57,7 +57,9 @@ export const AcademicTemplateForm = ({ academicPrograms, academicWorkers, templa
         <div className="flex flex-col items-center justify-center">
             <div className="flex-col object-fill w-5/6 sm:w-2/3 pt-5 mt-5">
                 <form className="flex flex-col gap-2">
-                    <NtInput academicWorkers={academicWorkers} />
+                    {
+                        !template?.id && <NtInput academicWorkers={academicWorkers} />
+                    }
                     <div className="flex gap-2" >
                         <Textarea minRows={1} size="sm" radius="md" isRequired label="Nombre" type="text" name="nombre" onChange={handleGlobalChange} value={record?.nombre} />
                         <Select className="w-40" label="Sexo" name="sexo" onChange={handleGlobalChange}>
@@ -72,13 +74,13 @@ export const AcademicTemplateForm = ({ academicPrograms, academicWorkers, templa
                     </Select>
                     <YearAndPeriodSelector />
                     <AcademicCharge academicPrograms={academicPrograms} />
-                    <AddActivityButton />
+                    <AddActivityButton isDisabled={template?.id}/>
                     <Input label="Total" type="number" min={0} name="total" value={totalHoras == 0 ? '' : totalHoras} defaultValue={record?.total} isDisabled onChange={handleGlobalChange} />
                     <Button startContent={
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                         </svg>
-                    } className="w-full bg-utim" variant="solid" onPress={handleSubmit} isDisabled={(totalHoras < 32)}>
+                    } className="w-full bg-utim" variant="solid" onPress={handleSubmit} isDisabled={(template?.id)||(totalHoras < 32)}>
                         Guardar
                     </Button>
                 </form>

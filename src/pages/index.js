@@ -6,7 +6,6 @@ import { promiseResolver } from "@/utils";
 import { useRouter } from "next/router";
 
 export default function Index({ academicPrograms, academicWorkers, getSsrError }) {
-  const router = useRouter()
   return (
     <>
       <ModalError error={getSsrError} />
@@ -24,7 +23,7 @@ export const getStaticProps = async () => {
     console.error('#ERROR# Error al obtener datos de programas educativos y/o trabajadores')
   }
   return {
-    revalidate: 10,
+    revalidate: 5,
     props: {
       getSsrError: error ? 'Algo salió mal, recarga la página' : null,
       academicPrograms: eduData.data,
