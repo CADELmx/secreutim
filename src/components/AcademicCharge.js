@@ -2,7 +2,7 @@ import { Accordion, AccordionItem, Badge, BreadcrumbItem, Breadcrumbs, Button, C
 import { Activity } from "./Activity"
 import { StoredContext } from "@/context"
 
-export const AcademicCharge = ({ programasEducativos }) => {
+export const AcademicCharge = ({ academicPrograms }) => {
     const { memory: { record: { actividades }, selectedItem }, setStored } = StoredContext()
     return (
         <Accordion aria-label="Academic Details" showDivider={false} isCompact fullWidth selectionMode="multiple">
@@ -65,7 +65,7 @@ export const AcademicCharge = ({ programasEducativos }) => {
             } title='Detalles de carga académica'>
                 {
                     actividades.filter((e) => e.id == selectedItem).map((act, i) => {
-                        return <Activity key={act.id} act={act} eduPrograms={programasEducativos} />
+                        return <Activity key={act.id} act={act} eduPrograms={academicPrograms} />
                     })
                 }
             </AccordionItem>
