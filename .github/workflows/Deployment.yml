@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: production
+    environment: Production
     steps:
       - name: Deploy to production
         uses: johnbeynon/render-deploy-action@v0.0.8
