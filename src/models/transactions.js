@@ -60,6 +60,14 @@ export const insertComment = (template_id, comment) => {
     return supabase.from('comentarios').insert({ plantilla_id: template_id, comentario: comment }).select('id')
 }
 
+export const updateComment = (template_id, comment) => {
+    return supabase.from('comentarios').update({ comentario: comment }).eq('plantilla_id', template_id).select('id')
+}
+
+export const checkExistentComment = (template_id) => {
+    return supabase.from('comentarios').select('id').eq('plantilla_id', template_id)
+}
+
 export const generateRecords = async () => {
     const plantillaPromise = getTemplates()
     const actividadesPromise = getActivites()
