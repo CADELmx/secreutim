@@ -1,5 +1,5 @@
-import { generateTemplateObject, puestos, singlePromiseResolver, sumHoras } from '@/utils'
-import { useEffect } from 'react'
+import { puestos, sumHoras } from '@/utils'
+import { useEffect, useState } from 'react'
 import { AcademicCharge } from './AcademicCharge'
 import { YearAndPeriodSelector } from './Selector'
 import { Button, Input, Select, SelectItem, Textarea } from '@nextui-org/react'
@@ -7,10 +7,10 @@ import { NtInput } from './WorkerNumber'
 import { AddActivityButton } from './Activity'
 import { StoredContext } from '@/context'
 import toast from 'react-hot-toast'
-import { insertActivities, insertTemplate } from '@/models/transactions'
 
 export const AcademicTemplateForm = ({ academicPrograms, academicWorkers, template }) => {
     const { memory: { record, socket }, setStored, handleGlobalChange } = StoredContext()
+    const [loading, setLoading] = useState(false)
     const getPuesto = (puesto) => {
         if (puesto == "") return []
         if (!puestos.includes(puesto)) {
@@ -21,36 +21,36 @@ export const AcademicTemplateForm = ({ academicPrograms, academicWorkers, templa
     }
     const totalHoras = sumHoras(record?.actividades)
     const handleSubmit = () => {
-        const template = generateTemplateObject(record)
-        toast.promise(insertTemplate(template), {
-            loading: 'Guardando...',
-            success: ({ data, error }) => {
-                if (error) {
-                    return 'Error al guardar plantilla'
-                }
-                const activities = record.actividades.map(p => {
-                    return {
-                        ...p,
-                        plantilla_id: data[0]?.id,
-                    }
-                })
-                const { error: actError } = singlePromiseResolver(insertActivities(activities))
-                const newTemplate = {
-                    id: data[0].id,
-                    ...record,
-                }
-                socket.emit('templateSend', newTemplate)
-                if (actError) {
-                    return 'Error al guardar carga académica'
-                }
-                return 'Guardado, enviado a secretaría'
-            },
-            error: 'Error al enviar',
-        })
+        if (socket.disconnected) {
+            toast.error('No hay conexión con el servidor', {
+                id: 'no-connection'
+            })
+            return
+        }
+        setLoading(true)
+        socket.emit('createTemplate', record)
     }
-    useEffect(() => {            
+    useEffect(() => {
         if (template?.id) {
             setStored({ record: template })
+        }
+        const onCreatedTemplate = () => {
+            setLoading(false)
+            toast.success('Plantilla guardada', {
+                id: 'template-save'
+            })
+        }
+        const onTemplateError = () => {
+            setLoading(false)
+            toast.error('Error al guardar plantilla', {
+                id: 'template-save'
+            })
+        }
+        socket.on('createdTemplate', onCreatedTemplate)
+        socket.on('templateError', onTemplateError)
+        return () => {
+            socket.off('createdTemplate', onCreatedTemplate)
+            socket.off('templateError', onTemplateError)
         }
     }, [])
     return (
@@ -74,13 +74,13 @@ export const AcademicTemplateForm = ({ academicPrograms, academicWorkers, templa
                     </Select>
                     <YearAndPeriodSelector />
                     <AcademicCharge academicPrograms={academicPrograms} />
-                    <AddActivityButton isDisabled={template?.id}/>
+                    <AddActivityButton isDisabled={template?.id} />
                     <Input label="Total" type="number" min={0} name="total" value={totalHoras == 0 ? '' : totalHoras} defaultValue={record?.total} isDisabled onChange={handleGlobalChange} />
                     <Button startContent={
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                         </svg>
-                    } className="w-full bg-utim" variant="solid" onPress={handleSubmit} isDisabled={(template?.id)||(totalHoras < 32)}>
+                    } className="w-full bg-utim" variant="solid" onPress={handleSubmit} isDisabled={(template?.id) || (totalHoras < 32)} isLoading={loading}>
                         Guardar
                     </Button>
                 </form>

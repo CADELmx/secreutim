@@ -26,10 +26,18 @@ export const Layout = ({ children }) => {
             setIsConnected(false)
             setTrasport("N/A")
         }
-        function onTemplateSave(data) {
+        function onTemplateError(data) {
+            if (router.pathname === "/") {
+                toast.error(data, {
+                    id: "template-error",
+                    duration: 5000,
+                })
+            }
+        }
+        function onCreatedTemplate(data) {
             if (router.pathname === "/secretary") {
                 toast.success('Plantilla docente recibida', {
-                    id: "notify",
+                    id: "template-created",
                     duration: 5000,
                 })
             }
@@ -47,8 +55,9 @@ export const Layout = ({ children }) => {
         }
         socket.on("connect", onConnect)
         socket.on("disconnect", onDisconnect)
-        socket.on("templateSave", onTemplateSave)
+        socket.on("createdTemplate", onCreatedTemplate)
         socket.on("updateStatus", onStatusUpdate)
+        socket.on("templateError", onTemplateError)
         return () => {
             socket.off("connect", onConnect)
             socket.off("disconnect", onDisconnect)
