@@ -1,4 +1,5 @@
-import { promiseResolver, supabase } from "@/utils"
+import { promiseResolver } from "@/utils"
+import { supabase } from "./conector"
 
 export const insertActivities = async (activities) => {
     const response = await supabase.from('actividad').insert(activities).select('id')
