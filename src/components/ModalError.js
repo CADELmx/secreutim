@@ -4,7 +4,7 @@ import { useRouter } from "next/router"
 export const ModalError = ({ error }) => {
     const router = useRouter()
     return (
-        error && <Modal defaultOpen isKeyboardDismissDisabled hideCloseButton isDismissable={false} backdrop="blur">
+        error && <Modal placement="center" defaultOpen isKeyboardDismissDisabled hideCloseButton isDismissable={false} backdrop="blur">
             <ModalContent>
                 <ModalHeader>
                     Aviso
@@ -13,7 +13,7 @@ export const ModalError = ({ error }) => {
                     {error}
                 </ModalBody>
                 <ModalFooter>
-                    <Button variant="solid" size="sm" color="primary" onPress={() => { router.reload() }}>Recargar</Button>
+                    <Button variant="solid" size="sm" className="bg-utim" onPress={() => { router.reload() }}>Recargar</Button>
                 </ModalFooter>
             </ModalContent>
         </Modal>

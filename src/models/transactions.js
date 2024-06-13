@@ -1,4 +1,5 @@
-import { promiseResolver, supabase } from "@/utils"
+import { promiseResolver } from "@/utils"
+import { supabase } from "./conector"
 
 export const insertActivities = async (activities) => {
     const response = await supabase.from('actividad').insert(activities).select('id')
@@ -58,6 +59,18 @@ export const setTemplateStatus = (id, status) => {
 
 export const insertComment = (template_id, comment) => {
     return supabase.from('comentarios').insert({ plantilla_id: template_id, comentario: comment }).select('id')
+}
+
+export const updateComment = (template_id, comment) => {
+    return supabase.from('comentarios').update({ comentario: comment }).eq('plantilla_id', template_id).select('id')
+}
+
+export const checkExistentComment = (template_id) => {
+    return supabase.from('comentarios').select('id').eq('plantilla_id', template_id)
+}
+
+export const getCommentsJoinTemplates = () => {
+    return supabase.from('comentarios').select('id,comentario,plantilla(*)')
 }
 
 export const generateRecords = async () => {

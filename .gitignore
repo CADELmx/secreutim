@@ -35,4 +35,4 @@ next-env.d.ts
 
 # database files sql and erd desiner file
 *.sql
-.erd.json
+*.erd.json

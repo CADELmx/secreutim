@@ -5,17 +5,40 @@ import { StoredContext } from "@/context";
 import { generateRecords } from "@/models/transactions";
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function Secretary({ plantillas, error }) {
   const { memory: { socket } } = StoredContext()
   const [templates, setTemplates] = useState(plantillas || []);
   useEffect(() => {
-    const onTemplateSave = (templateObject) => {
+    const onCreatedTemplate = (templateObject) => {
       setTemplates((templates) => ([...templates, templateObject]))
     }
-    socket.on('templateSave', onTemplateSave)
+    const onCreateComment = (data) => {
+      if (data.error) {
+        toast.error('Error al enviar comentario', {
+          id: 'comment-insert'
+        })
+        return
+      }
+      toast('Comentario enviado', {
+        id: 'comment-insert'
+      })
+    }
+    const onExistentComment = (data) => {
+      if (data.error) {
+        toast.error('Error al editar comentario')
+        return
+      }
+      toast.error('Comentario editaro')
+    }
+    socket.on('createdTemplate', onCreatedTemplate)
+    socket.on('createComment', onCreateComment)
+    socket.on('existentComment', onExistentComment)
     return () => {
-      socket.off('connection');
+      socket.off('createdTemplate')
+      socket.off('createComment')
+      socket.off('existentComment')
     };
   }, []);
   return (
