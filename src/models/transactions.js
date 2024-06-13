@@ -69,6 +69,10 @@ export const checkExistentComment = (template_id) => {
     return supabase.from('comentarios').select('id').eq('plantilla_id', template_id)
 }
 
+export const getCommentsJoinTemplates = () => {
+    return supabase.from('comentarios').select('id,comentario,plantilla(*)')
+}
+
 export const generateRecords = async () => {
     const plantillaPromise = getTemplates()
     const actividadesPromise = getActivites()
