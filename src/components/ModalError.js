@@ -13,7 +13,7 @@ export const ModalError = ({ error }) => {
                     {error}
                 </ModalBody>
                 <ModalFooter>
-                    <Button variant="solid" size="sm" color="primary" onPress={() => { router.reload() }}>Recargar</Button>
+                    <Button variant="solid" size="sm" className="bg-utim" onPress={() => { router.reload() }}>Recargar</Button>
                 </ModalFooter>
             </ModalContent>
         </Modal>

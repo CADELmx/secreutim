@@ -1,3 +1,4 @@
+import { ModalError } from "@/components/ModalError"
 import { StoredContext } from "@/context"
 import { generateRecords } from "@/models/transactions"
 import { Chip, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react"
@@ -9,7 +10,7 @@ const colors = {
     'Pendiente': 'warning'
 }
 
-export default function TemplatesStatus({ plantillas }) {
+export default function TemplatesStatus({ plantillas, error }) {
     const { memory: { socket } } = StoredContext()
     const [templates, setTemplates] = useState(plantillas || [])
     useEffect(() => {
@@ -31,35 +32,39 @@ export default function TemplatesStatus({ plantillas }) {
     }, [])
 
     return (
-        <div>
-            {
-                templates.length > 0 ? (
-                    <Table aria-label="tabla de plantillas">
-                        <TableHeader aria-label="cabecera de la tabla">
-                            <TableColumn aria-label="columna nombre">Nombre</TableColumn>
-                            <TableColumn aria-label="columna actividades">Actividades</TableColumn>
-                            <TableColumn aria-label="columna horas">Horas</TableColumn>
-                            <TableColumn aria-label="columna estado">Estado</TableColumn>
-                        </TableHeader>
-                        <TableBody items={templates}>
-                            {
-                                (template) => (
-                                    <TableRow key={template.id}>
-                                        <TableCell aria-label="nombre">{template.nombre}</TableCell>
-                                        <TableCell aria-label="actividades">{template.actividades.length}</TableCell>
-                                        <TableCell aria-label="horas">{template.horas}</TableCell>
-                                        <TableCell aria-label="estado">
-                                            <Chip color={colors[template.status]}>{template.status}</Chip>
-                                        </TableCell>
-                                    </TableRow>
-                                )
-                            }
-                        </TableBody>
-                    </Table>
-                ) : (
-                    <p className="text-center">No hay contenido</p>
-                )
-            }
+        <div className="grid content-center justify-center">
+            <ModalError error={error} />
+            <p className="tracking-widest p-2 m-2">Formatos enviados</p>
+            <section className="flex-col">
+                {
+                    templates.length > 0 ? (
+                        <Table aria-label="tabla de plantillas">
+                            <TableHeader aria-label="cabecera de la tabla">
+                                <TableColumn aria-label="columna nombre">Nombre</TableColumn>
+                                <TableColumn aria-label="columna actividades">Actividades</TableColumn>
+                                <TableColumn aria-label="columna horas">Horas</TableColumn>
+                                <TableColumn aria-label="columna estado">Estado</TableColumn>
+                            </TableHeader>
+                            <TableBody items={templates}>
+                                {
+                                    (template) => (
+                                        <TableRow key={template.id}>
+                                            <TableCell aria-label="nombre">{template.nombre}</TableCell>
+                                            <TableCell aria-label="actividades">{template.actividades.length}</TableCell>
+                                            <TableCell aria-label="horas">{template.total}</TableCell>
+                                            <TableCell aria-label="estado">
+                                                <Chip color={colors[template.status]}>{template.status}</Chip>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                }
+                            </TableBody>
+                        </Table>
+                    ) : (
+                        <p className="text-center">No hay contenido</p>
+                    )
+                }
+            </section>
         </div>
     )
 }
