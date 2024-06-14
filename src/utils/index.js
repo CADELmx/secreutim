@@ -1,3 +1,4 @@
+import { Socket } from "socket.io-client"
 
 export const promiseResolver = async (promiseList) => {
     const results = await Promise.allSettled(promiseList)
@@ -107,4 +108,19 @@ export const generateTemplateObject = (record) => {
     })
     )
     return plantilla
+}
+/**
+ * 
+ * @param {Socket} socket 
+ * @param {*} toast 
+ * @returns 
+ */
+export const checkSocketStatus = (socket,toast) => {
+    if (socket.disconnected) {
+        toast.error('No hay conexión con el servidor', {
+            id: 'no-connection'
+        })
+        return true
+    }
+    return false
 }

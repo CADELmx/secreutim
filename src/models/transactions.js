@@ -65,12 +65,16 @@ export const updateComment = (template_id, comment) => {
     return supabase.from('comentarios').update({ comentario: comment }).eq('plantilla_id', template_id).select('id')
 }
 
+export const deleteComment = (template_id) => {
+    return supabase.from('comentarios').delete().eq('plantilla_id', template_id).select('id')
+}
+
 export const checkExistentComment = (template_id) => {
     return supabase.from('comentarios').select('id').eq('plantilla_id', template_id)
 }
 
-export const getCommentsJoinTemplates = () => {
-    return supabase.from('comentarios').select('id,comentario,plantilla(*)')
+export const getTemplateJoin = () => {
+    return supabase.from('plantilla').select('id,nombre,total,status,comentarios(*)')
 }
 
 export const generateRecords = async () => {

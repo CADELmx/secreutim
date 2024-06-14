@@ -1,6 +1,6 @@
 import { ModalError } from "@/components/ModalError"
 import { StoredContext } from "@/context"
-import { generateRecords, getCommentsJoinTemplates } from "@/models/transactions"
+import { getTemplateJoin } from "@/models/transactions"
 import { Chip, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/react"
 import { useEffect, useState } from "react"
 
@@ -10,21 +10,19 @@ const colors = {
     'Pendiente': 'warning'
 }
 
-export default function TemplatesStatus({ comments, error }) {
+export default function TemplatesStatus({ plantillas, error }) {
     const { memory: { socket } } = StoredContext()
-    const [templates, setTemplates] = useState(comments || [])
+    const [templates, setTemplates] = useState(plantillas || [])
     useEffect(() => {
         const onUpdateStatus = (statusObject) => {
-            setTemplates((templates) => templates.map(({plantilla}) => {
+            setTemplates((templates) => templates.map((plantilla) => {
                 if (plantilla.id === statusObject.id) {
                     return {
-                        ...template,
-                        plantilla:{
-                            ...template.plantilla,status: statusObject.plantilla.status.name
-                        }
+                        ...plantilla,
+                        status: statusObject.status.name
                     }
                 }
-                return template
+                return plantilla
             }))
         }
         socket.on('updateStatus', onUpdateStatus)
@@ -51,12 +49,12 @@ export default function TemplatesStatus({ comments, error }) {
                                 {
                                     (template) => (
                                         <TableRow key={template.id}>
-                                            <TableCell aria-label="nombre">{template.plantilla.nombre}</TableCell>
-                                            <TableCell aria-label="horas">{template.plantilla.total}</TableCell>
+                                            <TableCell aria-label="nombre">{template.nombre}</TableCell>
+                                            <TableCell aria-label="horas">{template.total}</TableCell>
                                             <TableCell aria-label="estado">
-                                                <Chip color={colors[template.plantilla.status]}>{template.plantilla.status}</Chip>
+                                                <Chip color={colors[template.status]}>{template.status}</Chip>
                                             </TableCell>
-                                            <TableCell aria-label="comentarios">{template?.comentario || 'Sin comentario'}</TableCell>
+                                            <TableCell aria-label="comentarios">{template.comentarios?.comentario || 'Sin comentario'}</TableCell>
                                         </TableRow>
                                     )
                                 }
@@ -72,12 +70,18 @@ export default function TemplatesStatus({ comments, error }) {
 }
 
 export const getStaticProps = async () => {
-    const {data,error} = await getCommentsJoinTemplates()
+    const { data, error } = await getTemplateJoin()
+    if(error) {
+        return {
+            props: {
+                error: 'Error al obtener las plantillas'
+            }
+        }
+    }
     return {
         revalidate: 1,
         props: {
-            comments: data,
-            error
+            plantillas: data
         }
     }
 }

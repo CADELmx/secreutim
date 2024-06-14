@@ -27,10 +27,14 @@ export default function Secretary({ plantillas, error }) {
     }
     const onExistentComment = (data) => {
       if (data.error) {
-        toast.error('Error al editar comentario')
+        toast.error('Error al editar comentario',{
+          id: 'comment-update'
+        })
         return
       }
-      toast.error('Comentario editaro')
+      toast('Comentario editado',{
+        id: 'comment-update'
+      })
     }
     socket.on('createdTemplate', onCreatedTemplate)
     socket.on('createComment', onCreateComment)
