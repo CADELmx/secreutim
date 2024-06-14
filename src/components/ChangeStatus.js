@@ -1,5 +1,6 @@
 
 import { StoredContext } from '@/context';
+import { checkSocketStatus } from '@/utils';
 import { Button, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, useDisclosure } from '@nextui-org/react'
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -12,17 +13,10 @@ export const ChangeStatus = ({ status, templateid }) => {
     const [comment, setComment] = useState('')
     const error = comment.length < 2
     const [taskStatus, setTaskStatus] = useState(statusTypes.find(s => s.name === status) || statusTypes[0])
-    const checkSocketStatus = () => {
-        if (socket.disconnected) {
-            toast.error('No hay conexión con el servidor', {
-                id: 'no-connection'
-            })
-            return true
-        }
-        return false
-    }
+
     const handleUpdateStatus = (newStatus) => {
-        if (checkSocketStatus()) return
+        if (checkSocketStatus(socket, toast)) return
+        if (newStatus.name === 'Aprobado') socket.emit('deleteComment', { id: templateid })
         socket.emit('updateStatus', { id: templateid, status: newStatus })
         toast('Cambiando estado...', {
             id: 'status-change'
@@ -36,14 +30,14 @@ export const ChangeStatus = ({ status, templateid }) => {
         }
     }
     const handleInsertComment = () => {
-        if (checkSocketStatus()) return
+        if (checkSocketStatus(socket, toast)) return
         socket.emit('createComment', { id: templateid, comment })
         toast('Enviando comentario...', {
             id: 'comment-insert'
         })
     }
     const handleSetStatus = () => {
-        if (checkSocketStatus()) return
+        if (checkSocketStatus(socket, toast)) return
         socket.emit('updateStatus', { id: templateid, status: { name: 'Corrección', color: 'danger' } })
         toast('Enviando a corrección...', {
             id: 'status-change'
@@ -68,7 +62,7 @@ export const ChangeStatus = ({ status, templateid }) => {
                 })
             }
         }
-        socket.on('updateStatus',onUpdateStatus)
+        socket.on('updateStatus', onUpdateStatus)
         return () => {
             socket.off('updateStatus')
         };

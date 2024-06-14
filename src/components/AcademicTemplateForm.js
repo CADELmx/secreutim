@@ -1,4 +1,4 @@
-import { puestos, sumHoras } from '@/utils'
+import { checkSocketStatus, puestos, sumHoras } from '@/utils'
 import { useEffect, useState } from 'react'
 import { AcademicCharge } from './AcademicCharge'
 import { YearAndPeriodSelector } from './Selector'
@@ -21,12 +21,7 @@ export const AcademicTemplateForm = ({ academicPrograms, academicWorkers, templa
     }
     const totalHoras = sumHoras(record?.actividades)
     const handleSubmit = () => {
-        if (socket.disconnected) {
-            toast.error('No hay conexión con el servidor', {
-                id: 'no-connection'
-            })
-            return
-        }
+        if (checkSocketStatus(socket, toast)) return
         setLoading(true)
         socket.emit('createTemplate', record)
     }
