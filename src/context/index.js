@@ -11,7 +11,7 @@ export const ContextProvider = ({ children }) => {
         record: defaultRecord,
         defaultGroups: [],
         socket: io(),
-        selectedItem: defaultRecord.actividades[0].id
+        selectedItem: defaultRecord.actividad[0].id
     })
     const setStored = (prop) => setMemory((prev) => ({ ...prev, ...prop }))
     const handleGlobalChange = (event) => setStored({
