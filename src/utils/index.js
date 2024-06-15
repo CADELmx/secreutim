@@ -62,7 +62,7 @@ export const defaultRecord = {
     puesto: "",
     anio: new Date().getFullYear(),
     periodo: "",
-    actividades: [
+    actividad: [
         defaultActivity
     ],
     total: 0,

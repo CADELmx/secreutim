@@ -65,7 +65,7 @@ export default function Secretary({ plantillas, error }) {
                   (template) => (
                     <TableRow key={template.id}>
                       <TableCell aria-label="nombre">{template.nombre}</TableCell>
-                      <TableCell aria-label="numero de actividades">{template.actividades.length}</TableCell>
+                      <TableCell aria-label="numero de actividades">{template.actividad.length}</TableCell>
                       <TableCell aria-label="total horas">{template.total}</TableCell>
                       <TableCell className="p-0 m-0" aria-label="estado">
                         <ChangeStatus status={template.status} templateid={template.id} />

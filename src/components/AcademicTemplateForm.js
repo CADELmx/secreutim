@@ -19,7 +19,7 @@ export const AcademicTemplateForm = ({ academicPrograms, academicWorkers, templa
         }
         return [record?.puesto]
     }
-    const totalHoras = sumHoras(record?.actividades)
+    const totalHoras = sumHoras(record?.actividad)
     const handleSubmit = () => {
         if (checkSocketStatus(socket, toast)) return
         setLoading(true)

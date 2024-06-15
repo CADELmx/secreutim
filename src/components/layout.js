@@ -10,21 +10,21 @@ import toast from "react-hot-toast"
 export const Layout = ({ children }) => {
     const { memory: { socket } } = StoredContext()
     const [isConnected, setIsConnected] = useState(false);
-    const [trasport, setTrasport] = useState("N/A");
+    const [transport, setTransport] = useState("N/A");
     const router = useRouter()
     useEffect(() => {
         function onConnect() {
             setIsConnected(true)
-            setTrasport(socket.io.engine.transport.name)
+            setTransport(socket.io.engine.transport.name)
             socket.io.engine.on("upgrade", (transport) => {
-                setTrasport(transport.name)
+                setTransport(transport.name)
                 console.log(transport.name)
             })
             socket.emit("connection")
         }
         function onDisconnect() {
             setIsConnected(false)
-            setTrasport("N/A")
+            setTransport("N/A")
         }
         function onTemplateError(data) {
             if (router.pathname === "/") {
