@@ -1,5 +1,6 @@
 
 import { ChangeStatus } from "@/components/ChangeStatus";
+import { DownloadButton } from "@/components/DownloadButton";
 import { ModalError } from "@/components/ModalError";
 import { StoredContext } from "@/context";
 import { generateRecords } from "@/models/transactions";
@@ -27,12 +28,12 @@ export default function Secretary({ plantillas, error }) {
     }
     const onExistentComment = (data) => {
       if (data.error) {
-        toast.error('Error al editar comentario',{
+        toast.error('Error al editar comentario', {
           id: 'comment-update'
         })
         return
       }
-      toast('Comentario editado',{
+      toast('Comentario editado', {
         id: 'comment-update'
       })
     }
@@ -59,6 +60,7 @@ export default function Secretary({ plantillas, error }) {
                 <TableColumn aria-label="columna actividades">Actividades</TableColumn>
                 <TableColumn aria-label="columna horas">Horas</TableColumn>
                 <TableColumn aria-label="columna estado">Estado</TableColumn>
+                <TableColumn aria-label="columna descargar">Descargar</TableColumn>
               </TableHeader>
               <TableBody aria-label="cuerpo de la tabla" items={templates} emptyContent={<h1 className="tracking-widest p-2 m-2">Nada recibido aún</h1>}>
                 {
@@ -69,6 +71,9 @@ export default function Secretary({ plantillas, error }) {
                       <TableCell aria-label="total horas">{template.total}</TableCell>
                       <TableCell className="p-0 m-0" aria-label="estado">
                         <ChangeStatus status={template.status} templateid={template.id} />
+                      </TableCell>
+                      <TableCell aria-label="descargar">
+                        <DownloadButton templateid={template.id} templatename={template.nombre} />
                       </TableCell>
                     </TableRow>
                   )
