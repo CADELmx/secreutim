@@ -1,5 +1,5 @@
 import { Button } from '@nextui-org/react'
-import React from 'react'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 
 export const DownloadButton = ({ templateid, templatename }) => {
@@ -18,7 +18,7 @@ export const DownloadButton = ({ templateid, templatename }) => {
                 a.click()
                 document.body.removeChild(a)
                 setLoading(false)
-                return 'Descargado'
+                return await 'Descargado'
             },
             error: 'Error al descargar'
         })
