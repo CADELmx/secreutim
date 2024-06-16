@@ -52,7 +52,7 @@ export default function TemplatesStatus({ plantillas, error }) {
                                             <TableCell aria-label="nombre">{template.nombre}</TableCell>
                                             <TableCell aria-label="horas">{template.total}</TableCell>
                                             <TableCell aria-label="estado">
-                                                <Chip color={colors[template.status]}>{template.status}</Chip>
+                                                <Chip variant="dot" color={colors[template.status]}>{template.status}</Chip>
                                             </TableCell>
                                             <TableCell aria-label="comentarios">{template.comentarios?.comentario || 'Sin comentario'}</TableCell>
                                         </TableRow>
