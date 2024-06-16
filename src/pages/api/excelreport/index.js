@@ -90,6 +90,7 @@ export const generateWorkSheet = () => {
     worksheet.cell(2, 14).string('HRS').style(cellStyle)
     worksheet.cell(2, 15).string('TOTAL').style(greenStyle)
     worksheet.cell(1, 16, 2, 16, true).string('TOTAL').style(greenStyle)
+    worksheet.cell(3, 1, 5, 16).style(cellStyle)
     const generateCellA = (key, val) => {
         const entriesOpts = {
             'nombre_actividades': (i, value) => {

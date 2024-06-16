@@ -1,16 +1,22 @@
 import { StoredContext } from "@/context"
-import { Chip, Navbar, NavbarBrand, NavbarContent } from "@nextui-org/react"
-import { on } from "events"
+import { Chip, Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenu, NavbarMenuToggle } from "@nextui-org/react"
 import Image from "next/image"
+import Link from "next/link"
 import { useRouter } from "next/router"
 import logo from "public/utim.png"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 
 export const Layout = ({ children }) => {
+    const navBarMenuItems = [
+        { name: "Inicio", href: "/" },
+        { name: "Secretaría", href: "/secretary" },
+        { name: "Estado de plantillas", href: "/templatestatus" },
+    ]
     const { memory: { socket } } = StoredContext()
     const [isConnected, setIsConnected] = useState(false);
     const [transport, setTransport] = useState("N/A");
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const router = useRouter()
     useEffect(() => {
         function onConnect() {
@@ -65,17 +71,53 @@ export const Layout = ({ children }) => {
     }, [])
     return (
         <>
-            <Navbar>
-                <NavbarBrand>
-                    <Image src={logo} alt="UTIM" className="hidden sm:w-32 sm:flex" width={80} height={80} />
-                </NavbarBrand>
-                <NavbarContent justify="center">
-                    <h1 className="text-xl sm:text-2xl font-bold text-center">Gestión de plantillas docentes</h1>
+            <Navbar onMenuOpenChange={setIsMenuOpen}>
+                <NavbarContent>
+                    <NavbarMenuToggle
+                        aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+                        className="sm:hidden"
+                    />
+                    <NavbarBrand>
+                        <Image src={logo} alt="UTIM" className="sm:w-32 sm:flex" width={80} height={80} />
+                    </NavbarBrand>
                 </NavbarContent>
-                <NavbarContent justify="end">
-                    <Chip variant="dot" className="hidden sm:flex" color={isConnected ? "success" : "error"}>{isConnected ? "Conectado" : "Desconectado"}</Chip>
-                    <Chip variant="dot" radius="full" className="flex sm:hidden" color={isConnected ? "success" : "error"}>.</Chip>
+                <NavbarContent className="hidden sm:flex" justify="center">
+                    {
+                        navBarMenuItems.map((item) => (
+                            <NavbarItem key={item.name} isActive={router.pathname === item.href}>
+                                <Link
+                                    href={item.href}
+                                    className={router.pathname === item.href ? 'text-utim' : ''}>
+                                    {item.name}
+                                </Link>
+                            </NavbarItem>
+                        ))
+                    }
                 </NavbarContent>
+                {
+                    !isMenuOpen && (
+                        <NavbarContent justify="end">
+                            <Chip variant="dot" className="hidden sm:flex" color={isConnected ? "success" : "error"}>{isConnected ? "Conectado" : "Desconectado"}</Chip>
+                            <Chip variant="dot" radius="full" className="flex sm:hidden" color={isConnected ? "success" : "danger"}>.</Chip>
+                        </NavbarContent>
+                    )
+                }
+                <NavbarMenu>
+                    {
+                        navBarMenuItems.map((item) => (
+                            <NavbarItem key={item.name} isActive={router.pathname === item.href}>
+                                <Link
+                                    href={item.href}
+                                    className={router.pathname === item.href ? 'text-utim' : ''}>
+                                    {item.name}
+                                </Link>
+                            </NavbarItem>
+                        ))
+                    }
+                    <Chip variant="dot" color={isConnected ? "success" : "danger"}>
+                        {isConnected ? "Conectado" : "Desconectado"}
+                    </Chip>
+                </NavbarMenu>
             </Navbar>
             {children}
         </>
