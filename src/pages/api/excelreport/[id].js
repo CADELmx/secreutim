@@ -1,32 +1,24 @@
 import { getTemplateJoinActivitiesById } from "@/models/transactions"
-import { generateWorksheet } from "."
+import { generateWorkSheet, setupWorkSheet } from "."
 
 export default async function handler(req, res) {
     const { id } = req.query
     const { data, error } = await getTemplateJoinActivitiesById(id)
-    data.map(async (record, i) => {
-        const { workbook, worksheet, cellType } = generateWorksheet()
-        record.actividad.map((act, j) => {
-            const entries = Object.entries(act)
-            const generateCell = cellType(act.distribucion_actividades)
-            entries.map(([key, val]) => {
-                if (act.distribucion_actividades === 'Gestión') {
-                    const addCell = generateCell(key, act.tipo_gestion)
-                    if (typeof addCell === 'function') {
-                        addCell(j + 3, val)
-                    }
-                    return
-                }
-                const addCell = generateCell(key, val)
-                if (typeof addCell === 'function') {
-                    addCell(j + 3, val)
-                }
-            })
-        })
+    if (error) {
+        return res.status(500).json({ error: 'Error al obtener los datos de la plantilla' })
+    }
+    if (data.length === 0) {
+        return res.status(404).json({ error: 'No se encontraron datos' })
+    }
+    try {
+        const record = data[0]
+        const { workbook, worksheet, cellType } = generateWorkSheet()
+        record.actividad.forEach((act, i) => setupWorkSheet(act, i, cellType))
+        worksheet.cell(3, 16, 7, 16, true).number(record.total)
         const buffer = await workbook.writeToBuffer()
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        res.setHeader('Content-Disposition', `attachment; filename=Plantilla ${record.nombre}.xlsx`)
-        res.send()
-        res.end(buffer)
-    })
+        return res.send(buffer)
+    } catch (error) {
+        return res.status(500).json({ error: 'Error al generar el archivo' })
+    }
 }

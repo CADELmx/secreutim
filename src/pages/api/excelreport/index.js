@@ -1,7 +1,6 @@
 import { getTemplateJoinActivities } from "@/models/transactions"
 import style from "excel4node/distribution/lib/style"
 import Workbook from "excel4node/distribution/lib/workbook/workbook"
-import path from "path"
 
 const styleOptions = {
     font: {
@@ -34,7 +33,7 @@ const styleOptions = {
     }
 }
 
-export const generateWorksheet = () => {
+export const generateWorkSheet = () => {
     const workbook = new Workbook()
     const cellStyle = new style(workbook, styleOptions)
     const greenStyle = new style(workbook, {
@@ -179,27 +178,29 @@ export const generateWorksheet = () => {
     return { workbook, worksheet, cellType }
 }
 
+export const setupWorkSheet = (act, j, cellType) => {
+    const entries = Object.entries(act)
+    const generateCell = cellType(act.distribucion_actividades)
+    entries.forEach(([key, val]) => {
+        if (act.distribucion_actividades === 'Gestión') {
+            const addCell = generateCell(key, act.tipo_gestion)
+            if (typeof addCell === 'function') {
+                addCell(j + 3, val)
+            }
+        } else {
+            const addCell = generateCell(key, val)
+            if (typeof addCell === 'function') {
+                addCell(j + 3, val)
+            }
+        }
+    })
+}
+
 export default async function handler(req, res) {
     const { data, error } = await getTemplateJoinActivities()
     const workBooks = data.map((record, i) => {
-        const { workbook, worksheet, cellType } = generateWorksheet()
-        record.actividad.forEach((act, j) => {
-            const entries = Object.entries(act)
-            const generateCell = cellType(act.distribucion_actividades)
-            entries.forEach(([key, val]) => {
-                if (act.distribucion_actividades === 'Gestión') {
-                    const addCell = generateCell(key, act.tipo_gestion)
-                    if (typeof addCell === 'function') {
-                        addCell(j + 3, val)
-                    }
-                } else {
-                    const addCell = generateCell(key, val)
-                    if (typeof addCell === 'function') {
-                        addCell(j + 3, val)
-                    }
-                }
-            })
-        })
+        const { workbook, worksheet, cellType } = generateWorkSheet()
+        record.actividad.forEach((act, i) => setupWorkSheet(act, i, cellType))
         worksheet.cell(3, 16, 7, 16, true).number(record.total)
         return {
             workbook,
