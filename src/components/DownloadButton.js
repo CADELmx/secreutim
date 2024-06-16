@@ -4,21 +4,25 @@ import toast from 'react-hot-toast'
 
 export const DownloadButton = ({ templateid, templatename }) => {
     const [loading, setLoading] = useState(false)
+    const download = async (data) => {
+        const blob = await data.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `Plantilla ${templatename}.xlsx`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+    }
     const onDownload = () => {
+
         setLoading(true)
         toast.promise(fetch(`/api/excelreport/${templateid}`), {
             loading: 'Descargando...',
-            success: async (data) => {
-                const blob = await data.blob()
-                const url = window.URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = `Plantilla ${templatename}.xlsx`
-                document.body.appendChild(a)
-                a.click()
-                document.body.removeChild(a)
+            success: (data) => {
+                download(data)
                 setLoading(false)
-                return await 'Descargado'
+                return 'Descargado'
             },
             error: 'Error al descargar'
         })
