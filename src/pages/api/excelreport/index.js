@@ -178,7 +178,7 @@ export const generateWorkSheet = () => {
     return { workbook, worksheet, cellType }
 }
 
-export const setupWorkSheet = (act, j) => {
+export const setupWorkSheet = (act, j, cellType) => {
     const entries = Object.entries(act)
     const generateCell = cellType(act.distribucion_actividades)
     entries.forEach(([key, val]) => {
@@ -200,7 +200,7 @@ export default async function handler(req, res) {
     const { data, error } = await getTemplateJoinActivities()
     const workBooks = data.map((record, i) => {
         const { workbook, worksheet, cellType } = generateWorkSheet()
-        record.actividad.forEach(setupWorkSheet)
+        record.actividad.forEach((act, i) => setupWorkSheet(act, i, cellType))
         worksheet.cell(3, 16, 7, 16, true).number(record.total)
         return {
             workbook,
