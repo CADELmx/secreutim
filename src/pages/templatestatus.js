@@ -79,7 +79,7 @@ export const getStaticProps = async () => {
         }
     }
     return {
-        revalidate: 1,
+        revalidate: 3,
         props: {
             plantillas: data
         }

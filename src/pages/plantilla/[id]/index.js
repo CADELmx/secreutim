@@ -34,7 +34,7 @@ export const getStaticProps = async ({ params: { id } }) => {
     const { props } = await generateSingleRecord(id)
     const error = eduData.error || acaData.error || props.error
     return {
-        revalidate: 1,
+        revalidate: 3,
         props: {
             ...props,
             getSsrError: error ? 'Algo salió mal, recarga la página' : null,
