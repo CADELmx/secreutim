@@ -7,6 +7,7 @@ import { promiseResolver } from "@/utils";
 export default function Index({ academicPrograms, academicWorkers, getSsrError }) {
   return (
     <>
+      <h1 className="text-2xl font-bold text-center text-utim tracking-widest capitalize p-2 m-2">Crear plantilla</h1>
       <ModalError error={getSsrError} />
       <AcademicTemplateForm academicPrograms={academicPrograms} academicWorkers={academicWorkers} />
     </>

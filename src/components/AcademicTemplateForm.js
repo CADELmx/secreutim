@@ -12,12 +12,12 @@ export const AcademicTemplateForm = ({ academicPrograms, academicWorkers, templa
     const { memory: { record, socket }, setStored, handleGlobalChange } = StoredContext()
     const [loading, setLoading] = useState(false)
     const getPuesto = (puesto) => {
-        if (puesto == "") return []
+        if (puesto === "") return []
         if (!puestos.includes(puesto)) {
             puestos.push(puesto)
             return [puesto]
         }
-        return [record?.puesto]
+        return [record.puesto]
     }
     const totalHoras = sumHoras(record?.actividad)
     const handleSubmit = () => {
@@ -62,7 +62,7 @@ export const AcademicTemplateForm = ({ academicPrograms, academicWorkers, templa
                             <SelectItem key={'M'} variant="flat">M</SelectItem>
                         </Select>
                     </div>
-                    <Select selectedKeys={getPuesto(record?.puesto)} label='Puesto' name='puesto' onChange={handleGlobalChange}>
+                    <Select selectedKeys={getPuesto(record.puesto)} label='Puesto' name='puesto' onChange={handleGlobalChange}>
                         {
                             puestos.map((p) => <SelectItem key={p} textValue={p} variant="flat">{p}</SelectItem>)
                         }
