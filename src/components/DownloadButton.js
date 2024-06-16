@@ -15,9 +15,13 @@ export const DownloadButton = ({ templateid, templatename }) => {
         document.body.removeChild(a)
     }
     const onDownload = () => {
-
         setLoading(true)
-        toast.promise(fetch(`/api/excelreport/${templateid}`), {
+        toast.promise(fetch(`/api/excelreport/${templateid}`,{
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            }
+        }), {
             loading: 'Descargando...',
             success: (data) => {
                 download(data)
