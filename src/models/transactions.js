@@ -1,4 +1,3 @@
-import { promiseResolver } from "@/utils"
 import { supabase } from "./conector"
 
 export const insertActivities = async (activities) => {
@@ -41,6 +40,14 @@ export const getTemplates = () => {
     return supabase.from('plantilla').select('*')
 }
 
+export const getTemplateJoinActivities = () => {
+    return supabase.from('plantilla').select('id,nombre,actividad(*),total,status')
+}
+
+export const getTemplateJoinActivitiesById = (id) => {
+    return supabase.from('plantilla').select('id,nombre,actividad(*),total,status').eq('id', id)
+}
+
 export const getTemplate = (id) => {
     return supabase.from('plantilla').select('*').eq('id', id)
 }
@@ -65,35 +72,28 @@ export const updateComment = (template_id, comment) => {
     return supabase.from('comentarios').update({ comentario: comment }).eq('plantilla_id', template_id).select('id')
 }
 
+export const deleteComment = (template_id) => {
+    return supabase.from('comentarios').delete().eq('plantilla_id', template_id).select('id')
+}
+
 export const checkExistentComment = (template_id) => {
     return supabase.from('comentarios').select('id').eq('plantilla_id', template_id)
 }
 
-export const getCommentsJoinTemplates = () => {
-    return supabase.from('comentarios').select('id,comentario,plantilla(*)')
+export const getTemplateJoinComment = () => {
+    return supabase.from('plantilla').select('id,nombre,total,status,comentarios(*)')
 }
 
 export const generateRecords = async () => {
-    const plantillaPromise = getTemplates()
-    const actividadesPromise = getActivites()
-    const [plantillaRes, actividadesRes] = await promiseResolver([plantillaPromise, actividadesPromise])
-    const { data: plantillas, error: plantillasError } = plantillaRes
-    const { data: actividades, error: actividadesError } = actividadesRes
-    if (plantillasError || actividadesError) {
+    const { data, error } = await getTemplateJoinActivities()
+    if (error) {
         console.error('#ERROR# Error al obtener datos de plantillas y/o actividades')
         return {
             props: {
-                error: 'Error al obtener las plantillas'
+                error: 'Error al obtener las plantillas, recarga la página'
             }
         }
     }
-    const data = plantillas.map(plantilla => {
-        const actividadesPlantilla = actividades.filter(actividad => actividad.plantilla_id === plantilla.id)
-        return {
-            ...plantilla,
-            actividades: actividadesPlantilla
-        }
-    })
     return {
         props: {
             plantillas: data,
@@ -102,26 +102,18 @@ export const generateRecords = async () => {
 }
 
 export const generateSingleRecord = async (id) => {
-    const plantillaPromise = getTemplate(id)
-    const actividadesPromise = getActivitiesByTemplate(id)
-    const [plantillaRes, actividadesRes] = await promiseResolver([plantillaPromise, actividadesPromise])
-    const { data: plantillas, error: plantillasError } = plantillaRes
-    const { data: actividades, error: actividadesError } = actividadesRes
-    if (plantillasError || actividadesError) {
+    const { data, error } = await getTemplateJoinActivitiesById(id)
+    if (error) {
         console.error('#ERROR# Error al obtener datos de plantilla')
         return {
             props: {
-                error: 'Error al obtener la plantilla'
+                error: 'Error al obtener la plantilla, recarga la página'
             }
         }
     }
-    const data = {
-        ...plantillas[0],
-        actividades: actividades
-    }
     return {
         props: {
-            plantilla: data,
+            plantilla: data[0],
         }
     }
 }

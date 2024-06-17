@@ -1,4 +1,4 @@
-import { checkExistentComment, insertActivities, insertComment, insertTemplate, setTemplateStatus, updateComment } from "@/models/transactions";
+import { checkExistentComment, deleteComment, insertActivities, insertComment, insertTemplate, setTemplateStatus, updateComment } from "@/models/transactions";
 import { generateTemplateObject } from "@/utils";
 import { Server } from "socket.io";
 
@@ -48,11 +48,16 @@ const iohandler = (_, res) => {
             }
             io.emit('createdTemplate', newTemplate)
         }
+        const onDeleteComment = async commentObject => {
+            const { error } = await deleteComment(commentObject.id)
+            io.emit('deleteComment', { error, id: commentObject.id })
+        }
         io.on('connection', socket => {
             socket.emit('connection', socket.id)
             socket.on('updateStatus', onUpdateStatus)
             socket.on('createTemplate', onCreateTemplate)
             socket.on('createComment', onCreateComment)
+            socket.on('deleteComment', onDeleteComment)
         })
         res.socket.server.io = io
     } else {

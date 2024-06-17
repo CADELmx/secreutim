@@ -1,4 +1,4 @@
-import { puestos, sumHoras } from '@/utils'
+import { checkSocketStatus, puestos, sumHoras } from '@/utils'
 import { useEffect, useState } from 'react'
 import { AcademicCharge } from './AcademicCharge'
 import { YearAndPeriodSelector } from './Selector'
@@ -12,21 +12,16 @@ export const AcademicTemplateForm = ({ academicPrograms, academicWorkers, templa
     const { memory: { record, socket }, setStored, handleGlobalChange } = StoredContext()
     const [loading, setLoading] = useState(false)
     const getPuesto = (puesto) => {
-        if (puesto == "") return []
+        if (puesto === "") return []
         if (!puestos.includes(puesto)) {
             puestos.push(puesto)
             return [puesto]
         }
-        return [record?.puesto]
+        return [record.puesto]
     }
-    const totalHoras = sumHoras(record?.actividades)
+    const totalHoras = sumHoras(record?.actividad)
     const handleSubmit = () => {
-        if (socket.disconnected) {
-            toast.error('No hay conexión con el servidor', {
-                id: 'no-connection'
-            })
-            return
-        }
+        if (checkSocketStatus(socket, toast)) return
         setLoading(true)
         socket.emit('createTemplate', record)
     }
@@ -67,7 +62,7 @@ export const AcademicTemplateForm = ({ academicPrograms, academicWorkers, templa
                             <SelectItem key={'M'} variant="flat">M</SelectItem>
                         </Select>
                     </div>
-                    <Select selectedKeys={getPuesto(record?.puesto)} label='Puesto' name='puesto' onChange={handleGlobalChange}>
+                    <Select selectedKeys={getPuesto(record.puesto)} label='Puesto' name='puesto' onChange={handleGlobalChange}>
                         {
                             puestos.map((p) => <SelectItem key={p} textValue={p} variant="flat">{p}</SelectItem>)
                         }

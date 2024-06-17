@@ -7,15 +7,15 @@ import { useEffect } from 'react'
 
 export const Activity = ({ act, eduPrograms }) => {
     const { memory: { record, selectedItem }, setStored } = StoredContext()
-    const { actividades: acts } = record
+    const { actividad: acts } = record
     const handleChange = (e) => {
-        const actividades = acts.map((a) => {
+        const actividad = acts.map((a) => {
             return (a.id === selectedItem) ? { ...a, [e.target.name]: e.target.value } : a
         })
         setStored({
             record: {
                 ...record,
-                actividades
+                actividad
             }
         })
     }
@@ -24,14 +24,14 @@ export const Activity = ({ act, eduPrograms }) => {
             selectedItem: acts.length > 1 ? acts[acts.length - 2].id : acts[0].id,
             record: {
                 ...record,
-                actividades: acts.filter((a) => a.id !== act.id)
+                actividad: acts.filter((a) => a.id !== act.id)
             }
         })
     }
     const changeManagementType = (e) => {
         setStored({
             record: {
-                ...record, actividades: acts.map((a) => (a.id === selectedItem) ? {
+                ...record, actividad: acts.map((a) => (a.id === selectedItem) ? {
                     ...a, tipo_gestion: e.size === 0 ? '' : e.anchorKey
                 } : a)
             }
@@ -41,7 +41,7 @@ export const Activity = ({ act, eduPrograms }) => {
         const horas_semanales = e.anchorKey === 'TSU' ? 1 : 2
         setStored({
             record: {
-                ...record, actividades: acts.map((a) => (a.id === selectedItem) ? {
+                ...record, actividad: acts.map((a) => (a.id === selectedItem) ? {
                     ...a, horas_semanales, subtotal_clasificacion: horas_semanales * act.numero_estudiantes, tipo_estadia: e.size === 0 ? '' : e.anchorKey
                 } : a)
             }
@@ -50,7 +50,7 @@ export const Activity = ({ act, eduPrograms }) => {
     const changeGroup = (e) => {
         setStored({
             record: {
-                ...record, actividades: acts.map((a) => a.id === selectedItem ? {
+                ...record, actividad: acts.map((a) => a.id === selectedItem ? {
                     ...a, grados_grupos: Array.from(e), subtotal_clasificacion: Array.from(e).length * act.horas_semanales
                 } : a)
             }
@@ -60,7 +60,7 @@ export const Activity = ({ act, eduPrograms }) => {
         if (act.distribucion_actividades === "Estadía técnica") {
             setStored({
                 record: {
-                    ...record, actividades: acts.map(
+                    ...record, actividad: acts.map(
                         (a) => a.id === selectedItem ? { ...a, [e.target.name]: Number(e.target.value), subtotal_clasificacion: Number(e.target.value) * (act.numero_estudiantes || 1) } : a)
                 }
             })
@@ -73,14 +73,14 @@ export const Activity = ({ act, eduPrograms }) => {
             const subtotal_clasificacion = act.grados_grupos.length === 0 || e.target.value === '' ? '' : act.grados_grupos.length * Number(e.target.value)
             setStored({
                 record: {
-                    ...record, actividades: acts.map(
+                    ...record, actividad: acts.map(
                         (a) => a.id === selectedItem ? { ...a, [e.target.name]: Number(e.target.value), subtotal_clasificacion } : a)
                 }
             })
         } else {
             setStored({
                 record: {
-                    ...record, actividades: acts.map(
+                    ...record, actividad: acts.map(
                         (a) => a.id === selectedItem ? { ...a, [e.target.name]: Number(e.target.value), subtotal_clasificacion: Number(e.target.value) } : a)
                 }
             })
@@ -89,7 +89,7 @@ export const Activity = ({ act, eduPrograms }) => {
     const changeActivityProgram = (e) => {
         setStored({
             record: {
-                ...record, actividades: acts.map((a) => (a.id === selectedItem) ? {
+                ...record, actividad: acts.map((a) => (a.id === selectedItem) ? {
                     ...a, pe: e.size === 0 ? "" : e.anchorKey
                 } : a)
             }
@@ -98,13 +98,13 @@ export const Activity = ({ act, eduPrograms }) => {
     const changeStudentsNumber = (e) => {
         setStored({
             record: {
-                ...record, actividades: acts.map(
+                ...record, actividad: acts.map(
                     (a) => a.id === selectedItem ? { ...a, [e.target.name]: Number(e.target.value), subtotal_clasificacion: Number(e.target.value) * (act.horas_semanales || 1) } : a)
             }
         })
     }
     const updateTotal = () => {
-        const total = record.actividades
+        const total = record.actividad
             .map(e => e.subtotal_clasificacion)
             .reduce((p, c) => p + c, 0)
         setStored({
@@ -183,9 +183,9 @@ export const Activity = ({ act, eduPrograms }) => {
 
 export const AddActivityButton = ({isDisabled}) => {
     const { memory: { record }, setStored } = StoredContext()
-    const { actividades } = record
+    const { actividad } = record
     const handleCreate = () => {
-        if (actividades.length >= 10) {
+        if (actividad.length >= 10) {
             return toast.error('No puedes agregar más carga academica', {
                 id: 'max-activities'
             })
@@ -193,7 +193,7 @@ export const AddActivityButton = ({isDisabled}) => {
         const uuid = crypto.randomUUID()
         setStored({
             record: {
-                ...record, actividades: [...actividades, {
+                ...record, actividad: [...actividad, {
                     ...defaultActivity,
                     id: uuid
                 }]

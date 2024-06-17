@@ -1,5 +1,6 @@
 
 import { ChangeStatus } from "@/components/ChangeStatus";
+import { MoreOptions } from "@/components/DownloadButton";
 import { ModalError } from "@/components/ModalError";
 import { StoredContext } from "@/context";
 import { generateRecords } from "@/models/transactions";
@@ -27,10 +28,14 @@ export default function Secretary({ plantillas, error }) {
     }
     const onExistentComment = (data) => {
       if (data.error) {
-        toast.error('Error al editar comentario')
+        toast.error('Error al editar comentario', {
+          id: 'comment-update'
+        })
         return
       }
-      toast.error('Comentario editaro')
+      toast('Comentario editado', {
+        id: 'comment-update'
+      })
     }
     socket.on('createdTemplate', onCreatedTemplate)
     socket.on('createComment', onCreateComment)
@@ -47,34 +52,32 @@ export default function Secretary({ plantillas, error }) {
       <h1 className="text-2xl font-bold text-center text-utim tracking-widest capitalize p-2 m-2">Secretaría académica</h1>
       <p className="tracking-widest p-2 m-2">Formatos recibidos</p>
       <section className="flex-col">
-        {
-          templates.length > 0 ? (
-            <Table aria-label="tabla de plantillas">
-              <TableHeader aria-label="cabecera de la tabla">
-                <TableColumn aria-label="columna nombre">Nombre</TableColumn>
-                <TableColumn aria-label="columna actividades">Actividades</TableColumn>
-                <TableColumn aria-label="columna horas">Horas</TableColumn>
-                <TableColumn aria-label="columna estado">Estado</TableColumn>
-              </TableHeader>
-              <TableBody aria-label="cuerpo de la tabla" items={templates} emptyContent={<h1 className="tracking-widest p-2 m-2">Nada recibido aún</h1>}>
-                {
-                  (template) => (
-                    <TableRow key={template.id}>
-                      <TableCell aria-label="nombre">{template.nombre}</TableCell>
-                      <TableCell aria-label="numero de actividades">{template.actividades.length}</TableCell>
-                      <TableCell aria-label="total horas">{template.total}</TableCell>
-                      <TableCell className="p-0 m-0" aria-label="estado">
-                        <ChangeStatus status={template.status} templateid={template.id} />
-                      </TableCell>
-                    </TableRow>
-                  )
-                }
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-center">Nada recibido aún</p>
-          )
-        }
+        <Table aria-label="tabla de plantillas">
+          <TableHeader aria-label="cabecera de la tabla">
+            <TableColumn aria-label="columna nombre">Nombre</TableColumn>
+            <TableColumn aria-label="columna actividades">Actividades</TableColumn>
+            <TableColumn aria-label="columna horas">Horas</TableColumn>
+            <TableColumn aria-label="columna estado">Estado</TableColumn>
+            <TableColumn aria-label="columna descargar">Más</TableColumn>
+          </TableHeader>
+          <TableBody aria-label="cuerpo de la tabla" items={templates} emptyContent={<h1 className="tracking-widest p-2 m-2">Nada recibido aún</h1>}>
+            {
+              (template) => (
+                <TableRow key={template.id}>
+                  <TableCell aria-label="nombre">{template.nombre}</TableCell>
+                  <TableCell aria-label="numero de actividades">{template.actividad.length}</TableCell>
+                  <TableCell aria-label="total horas">{template.total}</TableCell>
+                  <TableCell className="p-0 m-0" aria-label="estado">
+                    <ChangeStatus status={template.status} templateid={template.id} />
+                  </TableCell>
+                  <TableCell aria-label="descargar">
+                    <MoreOptions templateid={template.id} templatename={template.nombre} />
+                  </TableCell>
+                </TableRow>
+              )
+            }
+          </TableBody>
+        </Table>
       </section>
     </div>
   )
@@ -83,7 +86,7 @@ export default function Secretary({ plantillas, error }) {
 export const getStaticProps = async () => {
   const { props } = await generateRecords()
   return {
-    revalidate: 1,
+    revalidate: 3,
     props: {
       ...props
     }
