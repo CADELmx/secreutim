@@ -5,7 +5,6 @@ const loginHandler = async (req, res) => {
         if (email === '' || password === '' || !email || !password) {
             return res.status(400).json({ error: 'Credenciales requeridas' })
         }
-        console.log(email, password)
         const response = await fetch(`${process.env.API_URL}/auth/login`, {
             method: 'POST',
             headers: {
