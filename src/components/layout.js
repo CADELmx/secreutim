@@ -1,11 +1,12 @@
 import { StoredContext } from "@/context"
-import { Chip, Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenu, NavbarMenuToggle } from "@nextui-org/react"
+import { Avatar, Chip, Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenu, NavbarMenuToggle } from "@nextui-org/react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import logo from "public/utim.png"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
+import { LoginButton } from "./LoginButton"
 
 export const Layout = ({ children }) => {
     const navBarMenuItems = [
@@ -13,7 +14,7 @@ export const Layout = ({ children }) => {
         { name: "Secretaría", href: "/secretary" },
         { name: "Estado de plantillas", href: "/templatestatus" },
     ]
-    const { memory: { socket } } = StoredContext()
+    const { memory: { socket, user } } = StoredContext()
     const [isConnected, setIsConnected] = useState(false);
     const [transport, setTransport] = useState("N/A");
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -97,6 +98,7 @@ export const Layout = ({ children }) => {
                 {
                     !isMenuOpen && (
                         <NavbarContent justify="end">
+                            <LoginButton />
                             <Chip variant="dot" className="hidden sm:flex" color={isConnected ? "success" : "error"}>{isConnected ? "Conectado" : "Desconectado"}</Chip>
                             <Chip variant="dot" radius="full" className="flex sm:hidden" color={isConnected ? "success" : "danger"}>.</Chip>
                         </NavbarContent>
@@ -114,6 +116,7 @@ export const Layout = ({ children }) => {
                             </NavbarItem>
                         ))
                     }
+                    <LoginButton />
                     <Chip variant="dot" color={isConnected ? "success" : "danger"}>
                         {isConnected ? "Conectado" : "Desconectado"}
                     </Chip>
