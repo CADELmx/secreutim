@@ -16,13 +16,11 @@ export default function Login() {
         toast.promise(login(email, password), {
             loading: 'Iniciando sesión...',
             success: ({ error }) => {
+                console.log(error)
                 setLoading(false)
                 return error ? 'Error al autenticar' : 'Usuario autenticado'
             },
-            error: () => {
-                setLoading(false)
-                return 'Error intentando iniciar sesión'
-            },
+            error: 'Error intentando iniciar sesión',
         })
     }
     return (
