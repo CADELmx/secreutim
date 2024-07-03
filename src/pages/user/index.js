@@ -1,11 +1,10 @@
 import { StoredContext } from "@/context";
-import { Avatar, Button, Chip, Input } from "@nextui-org/react";
+import { Avatar, Button, Input } from "@nextui-org/react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function Login() {
-    const { login, logout, memory: { user }
-    } = StoredContext()
+    const { login, logout, memory: { user } } = StoredContext()
     const [loading, setLoading] = useState(false);
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -16,7 +15,6 @@ export default function Login() {
         toast.promise(login(email, password), {
             loading: 'Iniciando sesión...',
             success: ({ error }) => {
-                console.log(error)
                 setLoading(false)
                 return error ? 'Error al autenticar' : 'Usuario autenticado'
             },
